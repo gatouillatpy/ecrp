@@ -1,0 +1,8 @@
+syntax: glob
+.vs/
+bin/
+tmp/
+*.sdf
+*.suo
+*.VC.db
+*.VC.opendb
