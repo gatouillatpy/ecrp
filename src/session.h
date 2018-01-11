@@ -3,36 +3,37 @@
 
 #include <boost/asio.hpp>
 
+using std::enable_shared_from_this;
+using boost::asio::ip::tcp;
+
 #include "request.h"
 #include "response.h"
 
-using boost::asio::ip::tcp;
-
 //----------------------------------------------------------------------
 
-namespace geodis
-{
-	class session : public std::enable_shared_from_this<session>
-	{
-	private: // MEMBERS
+namespace ecrp {
+    
+    class session : public enable_shared_from_this<session> {
+        
+        private: // MEMBERS
 
-		tcp::socket _socket;
+            tcp::socket _socket;
 
-	public: // CONSTRUCTORS
+        public: // CONSTRUCTORS
 
-		session(tcp::socket socket);
+            session(tcp::socket socket);
 
-		virtual ~session();
+            virtual ~session();
 
-	public: // METHODS
+        public: // METHODS
 
-		void start();
+            void start();
 
-		void send(response& res);
+            void send(response &res);
 
-	private: // METHODS
+        private: // METHODS
 
-		void read();
-		void readContent(request* pRequest);
-	};
+            void read();
+            void readContent(request *pRequest);
+    };
 }

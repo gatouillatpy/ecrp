@@ -4,78 +4,76 @@
 #include "session.h"
 #include "processor.h"
 
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::move;
+using boost::asio::ip::tcp;
+using boost::asio::async_write;
+using boost::system::error_code;
+using boost::asio::error::eof;
+
 //----------------------------------------------------------------------
 
-namespace geodis
-{
-	session::session(tcp::socket socket) : _socket(std::move(socket))
-	{
-	}
+namespace ecrp {
+    
+    session::session(tcp::socket socket) : _socket(move(socket)) {
+    }
 
-	session::~session()
-	{
-		std::cout << "Diconnected.\n";
-	}
+    session::~session() {
+        cout << "Diconnected." << endl;
+    }
 
-	void session::start()
-	{
-		boost::asio::ip::tcp::endpoint ep = _socket.remote_endpoint();
+    void session::start() {
+        tcp::endpoint ep = _socket.remote_endpoint();
 
-		std::cout << "Connected to " << ep.address().to_string() << ":" << ep.port() << ".\n";
+        cout << "Connected to " << ep.address().to_string() << ":" << ep.port() << "." << endl;
 
-		read();
-	}
+        read();
+    }
 
-	void session::send(response& res)
-	{
-		boost::asio::async_write(_socket, res.getBuffer(), [this](boost::system::error_code errcode, size_t)
-		{
-			if (errcode)
-				std::cerr << "ERROR: Something bad happened.\n";
-		});
-	}
+    void session::send(response &res) {
+        async_write(_socket, res.getBuffer(), [this](error_code e, size_t) {
+            if (e) {
+                cerr << "ERROR: Something bad happened." << endl;
+            }
+        });
+    }
 
-	void session::read()
-	{
-		request* pRequest = new request();
-		pRequest->setTarget(shared_from_this());
+    void session::read() {
+        request *pRequest = new request();
+        pRequest->setTarget(shared_from_this());
 
-		boost::asio::async_read(_socket, pRequest->getLengthBuffer(), [this, pRequest](boost::system::error_code errcode, size_t)
-		{
-			if (!errcode)
-			{
-				if (pRequest->isLengthValid())
-					readContent(pRequest);
-				else
-					std::cerr << "ERROR: The received message is too large.\n";
-			}
-			else
-			{
-				if (errcode.value() != boost::asio::error::eof)
-					std::cerr << "ERROR: Something bad happened.\n";
+        async_read(_socket, pRequest->getLengthBuffer(), [this, pRequest](error_code e, size_t) {
+            if (!e) {
+                if (pRequest->isLengthValid()) {
+                    readContent(pRequest);
+                } else {
+                    cerr << "ERROR: The received message is too large." << endl;
+                }
+            } else {
+                if (e.value() != eof) {
+                    cerr << "ERROR: Something bad happened." << endl;
+                }
 
-				pRequest->setTarget(nullptr);
-			}
-		});
-	}
+                pRequest->setTarget(nullptr);
+            }
+        });
+    }
 
-	void session::readContent(request* pRequest)
-	{
-		boost::asio::async_read(_socket, pRequest->getDataBuffer(), [this, pRequest](boost::system::error_code errcode, size_t)
-		{
-			if (!errcode)
-			{
-				processor::enqueueRequest(pRequest);
+    void session::readContent(request *pRequest) {
+        async_read(_socket, pRequest->getDataBuffer(), [this, pRequest](error_code e, size_t) {
+            if (!e) {
+                processor::enqueueRequest(pRequest);
 
-				read();
-			}
-			else
-			{
-				if (errcode.value() != boost::asio::error::eof)
-					std::cerr << "ERROR: Something bad happened.\n";
+                read();
+            } else {
+                if (e.value() != eof) {
+                    cerr << "ERROR: Something bad happened.\n";
+                }
 
-				pRequest->setTarget(nullptr);
-			}
-		});
-	}
+                pRequest->setTarget(nullptr);
+            }
+        });
+    }
 }

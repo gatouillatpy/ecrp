@@ -5,46 +5,53 @@
 
 #include <boost/asio.hpp>
 
+using std::string;
+using std::shared_ptr;
+using std::ostringstream;
+using std::deque;
+using boost::asio::mutable_buffers_1;
+
 #include "utils.h"
 
 //----------------------------------------------------------------------
 
-namespace geodis
-{
-	class session;
+namespace ecrp {
+    
+    class session;
 
-	class response
-	{
-	public: // CONSTANTS
+    class response {
+        public: // CONSTANTS
 
-		static const std::string STATUS_SUCCESS;
-		static const std::string STATUS_FAILURE;
+            static const string STATUS_SUCCESS;
+            static const string STATUS_FAILURE;
 
-	private: // MEMBERS
+        private: // MEMBERS
 
-		int _length;
-		byte* _data;
+            int _length;
+            byte *_data;
 
-		std::shared_ptr<session> _target;
+            shared_ptr<session> _target;
 
-		std::ostringstream _content;
+            ostringstream _content;
 
-	public: // CONSTRUCTORS
+        public: // CONSTRUCTORS
 
-		response(std::shared_ptr<session> target);
-		response(const response& other);
+            response(shared_ptr<session> target);
+            response(const response &other);
 
-		virtual ~response();
+            virtual ~response();
 
-	public: // METHODS
+        public: // METHODS
 
-		boost::asio::mutable_buffers_1 getBuffer();
+            mutable_buffers_1 getBuffer();
 
-		void init(int id);
-		void send();
+            void init(int id);
+            void send();
 
-		std::ostringstream& getContent() { return _content; }
-	};
-	
-	typedef std::deque<response> response_queue;
+            ostringstream &getContent() {
+                return _content;
+            }
+    };
+
+    typedef deque<response> response_queue;
 }

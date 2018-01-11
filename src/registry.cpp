@@ -10,296 +10,286 @@
 
 #include "registry.h"
 
+using std::atomic_int;
+using std::cerr;
+using std::endl;
+using std::ostringstream;
+using std::ofstream;
+using boost::mutex;
+using boost::condition_variable;
+using boost::thread;
+using boost::property_tree::ptree;
+using boost::property_tree::read_json;
+using boost::unique_lock;
+
 #if (defined(_MSC_VER) && (_MSC_VER > 600))
-#pragma warning(disable: 4996)
+    #pragma warning(disable: 4996)
 #endif
 
 //----------------------------------------------------------------------
 
-namespace geodis
-{
-	group::group(uint16_t id, const std::string& name) : _id(id), _name(name)
-	{
-	}
+namespace ecrp {
+    
+    group::group(uint16_t id, const string &name) : _id(id), _name(name) {
+    }
 
-	group::~group()
-	{
-	}
+    group::~group() {
+    }
 
-	tree* group::getTreeByLevel(uint16_t level)
-	{
-		auto t = _trees.find(level);
+    tree *group::getTreeByLevel(uint16_t level) {
+        auto t = _trees.find(level);
 
-		if (t != _trees.end())
-			return t->second;
+        if (t != _trees.end()) {
+            return t->second;
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 
-//----------------------------------------------------------------------
+    //----------------------------------------------------------------------
 
-	extern void initPagingSystem(int maxPagesInMemory);
+    extern void initPagingSystem(int maxPagesInMemory);
 
-	const char* REGISTRY_FILENAME = "registry.json";
+    const char *REGISTRY_FILENAME = "registry.json";
 
-	static void workerLoop();
+    static void workerLoop();
 
 #define TREE_ID(level, groupId) ((uint32_t)(level) << 16 | (uint32_t)(groupId))
 
-	static std::atomic_int NEXT_GROUP_ID(0);
-
-	static bool _isAlive;
-	static bool _isClean;
-
-	static std::unordered_map<uint32_t, tree*> _allTrees;
-	static std::unordered_map<uint16_t, group*> _groupsById;
-	static std::unordered_map<std::string, group*> _groupsByName;
-
-	static boost::condition_variable _initPoint;
-	static boost::condition_variable _syncPoint;
-
-	static boost::mutex _initMutex;
-	static boost::mutex _syncMutex;
-	static boost::mutex _dataMutex;
-
-	static boost::thread _worker(&workerLoop);
-
-	void registry::init(int maxPagesInMemory)
-	{
-		if (maxPagesInMemory != -1)
-			initPagingSystem(maxPagesInMemory);
-
-		FILE* f = fopen(REGISTRY_FILENAME, "r");
-
-		if (f != 0)
-		{
-			fclose(f);
-
-			try
-			{
-				boost::property_tree::ptree content;
-				boost::property_tree::read_json(REGISTRY_FILENAME, content);
-
-				auto nextGroupId = content.get_optional<int>("nextGroupId");
-				auto groups = content.get_child_optional("groups");
+    static atomic_int NEXT_GROUP_ID(0);
 
-				if (nextGroupId)
-					NEXT_GROUP_ID = nextGroupId.get();
+    static bool _isAlive;
+    static bool _isClean;
 
-				if (groups)
-				{
-					BOOST_FOREACH(const boost::property_tree::ptree::value_type &w, groups.get())
-					{
-						auto id = w.second.get_optional<int>("id");
-						auto name = w.second.get_optional<std::string>("name");
+    static unordered_map<uint32_t, tree *> _allTrees;
+    static unordered_map<uint16_t, group *> _groupsById;
+    static unordered_map<string, group *> _groupsByName;
 
-						if (id && name)
-						{
-							group* p = createGroup(id.get(), name.get());
+    static condition_variable _initPoint;
+    static condition_variable _syncPoint;
 
-							auto levels = w.second.get_child_optional("levels");
+    static mutex _initMutex;
+    static mutex _syncMutex;
+    static mutex _dataMutex;
 
-							if (levels)
-							{
-								BOOST_FOREACH(const boost::property_tree::ptree::value_type &z, levels.get())
-								{
-									auto level = z.second.get_value_optional<int>();
+    static thread _worker(&workerLoop);
 
-									if (level)
-										spawnTree(level.get(), p->getId());
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (boost::exception&)
-			{
-				std::cerr << "Unable to read the registry file." << std::endl;
-				exit(1101);
-			}
+    void registry::init(int maxPagesInMemory) {
+        if (maxPagesInMemory != -1) {
+            initPagingSystem(maxPagesInMemory);
+        }
 
-			_isClean = true;
-		}
-		else
-		{
-			_isClean = false;
-		}
+        FILE *f = fopen(REGISTRY_FILENAME, "r");
 
-		_initPoint.notify_one();
-	}
+        if (f != 0) {
+            fclose(f);
 
-	tree* registry::getOrSpawnTree(uint16_t level, uint16_t groupId)
-	{
-		tree* p;
+            try {
+                ptree content;
+                read_json(REGISTRY_FILENAME, content);
 
-		uint32_t id = TREE_ID(level, groupId);
+                auto nextGroupId = content.get_optional<int>("nextGroupId");
+                auto groups = content.get_child_optional("groups");
 
-		_dataMutex.lock();
+                if (nextGroupId) {
+                    NEXT_GROUP_ID = nextGroupId.get();
+                }
 
-		auto t = _allTrees.find(id);
+                if (groups) {
+                    BOOST_FOREACH(const ptree::value_type & w, groups.get()) {
+                        auto id = w.second.get_optional<int>("id");
+                        auto name = w.second.get_optional<string>("name");
 
-		if (t != _allTrees.end())
-		{
-			p = t->second;
-		}
-		else
-		{
-			p = spawnTree(level, groupId);
+                        if (id && name) {
+                            group *p = createGroup(id.get(), name.get());
 
-			_isClean = false;
-			_syncPoint.notify_one();
-		}
+                            auto levels = w.second.get_child_optional("levels");
 
-		_dataMutex.unlock();
+                            if (levels) {
+                                BOOST_FOREACH(const ptree::value_type & z, levels.get()) {
+                                    auto level = z.second.get_value_optional<int>();
 
-		return p;
-	}
+                                    if (level) {
+                                        spawnTree(level.get(), p->getId());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (boost::exception &) {
+                cerr << "Unable to read the registry file." << endl;
+                exit(1101);
+            }
 
-	group* registry::getOrCreateGroup(const std::string& name)
-	{
-		group* p;
+            _isClean = true;
+        } else {
+            _isClean = false;
+        }
 
-		_dataMutex.lock();
+        _initPoint.notify_one();
+    }
 
-		auto t = _groupsByName.find(name);
+    tree *registry::getOrSpawnTree(uint16_t level, uint16_t groupId) {
+        tree *p;
 
-		if (t != _groupsByName.end())
-		{
-			p = t->second;
-		}
-		else
-		{
-			p = createGroup(NEXT_GROUP_ID++, name);
+        uint32_t id = TREE_ID(level, groupId);
 
-			_isClean = false;
-			_syncPoint.notify_one();
-		}
+        _dataMutex.lock();
 
-		_dataMutex.unlock();
+        auto t = _allTrees.find(id);
 
-		return p;
-	}
+        if (t != _allTrees.end()) {
+            p = t->second;
+        } else {
+            p = spawnTree(level, groupId);
 
-	group* registry::getGroupById(uint16_t id)
-	{
-		group* p;
+            _isClean = false;
+            _syncPoint.notify_one();
+        }
 
-		_dataMutex.lock();
+        _dataMutex.unlock();
 
-		auto t = _groupsById.find(id);
+        return p;
+    }
 
-		if (t != _groupsById.end())
-			p = t->second;
-		else
-			p = 0;
+    group *registry::getOrCreateGroup(const string &name) {
+        group *p;
 
-		_dataMutex.unlock();
+        _dataMutex.lock();
 
-		return p;
-	}
+        auto t = _groupsByName.find(name);
 
-	static void workerLoop()
-	{
-		_isAlive = true;
+        if (t != _groupsByName.end()) {
+            p = t->second;
+        } else {
+            p = createGroup(NEXT_GROUP_ID++, name);
 
-		boost::unique_lock<boost::mutex> initLock(_initMutex);
-		boost::unique_lock<boost::mutex> syncLock(_syncMutex);
+            _isClean = false;
+            _syncPoint.notify_one();
+        }
 
-		_initPoint.wait(initLock);
+        _dataMutex.unlock();
 
-		while (_isAlive)
-		{
-			while (_isClean)
-				_syncPoint.wait(syncLock);
+        return p;
+    }
 
-			_dataMutex.lock();
+    group *registry::getGroupById(uint16_t id) {
+        group *p;
 
-			try
-			{
-				std::ostringstream s;
-				s << "{" << std::endl;
-				s << "\t" << "\"nextGroupId\": " << (int)NEXT_GROUP_ID << "," << std::endl;
-				s << "\t" << "\"groups\": " << std::endl;
-				s << "\t" << "[" << std::endl;
+        _dataMutex.lock();
 
-				auto wa = _groupsById.begin();
-				auto wb = _groupsById.end();
+        auto t = _groupsById.find(id);
 
-				for (auto w = wa; w != wb; )
-				{
-					auto p = w->second; w++;
+        if (t != _groupsById.end()) {
+            p = t->second;
+        } else {
+            p = 0;
+        }
 
-					s << "\t\t" << "{" << std::endl;
-					s << "\t\t\t" << "\"id\": " << (int)p->getId() << "," << std::endl;
-					s << "\t\t\t" << "\"name\": " << "\"" << p->getName() << "\"" << "," << std::endl;
-					s << "\t\t\t" << "\"levels\": " << "[";
+        _dataMutex.unlock();
 
-					auto za = p->beginIterator();
-					auto zb = p->endIterator();
+        return p;
+    }
 
-					for (auto z = za; z != zb; )
-					{
-						auto i = z->first; z++;
+    static void workerLoop() {
+        _isAlive = true;
 
-						s << (int)i;
+        unique_lock<mutex> initLock(_initMutex);
+        unique_lock<mutex> syncLock(_syncMutex);
 
-						if (z != zb) s << ", ";
-					}
+        _initPoint.wait(initLock);
 
-					s << "]" << std::endl;
-					s << "\t\t" << "}";
+        while (_isAlive) {
+            while (_isClean) {
+                _syncPoint.wait(syncLock);
+            }
 
-					if (w != wb) s << ",";
-					
-					s << std::endl;
-				}
+            _dataMutex.lock();
 
-				s << "\t" << "]" << std::endl;
-				s << "}" << std::endl;
+            try {
+                ostringstream s;
+                s << "{" << endl;
+                s << "\t" << "\"nextGroupId\": " << (int)NEXT_GROUP_ID << "," << endl;
+                s << "\t" << "\"groups\": " << endl;
+                s << "\t" << "[" << endl;
 
-				std::ofstream f(REGISTRY_FILENAME);
-				if (!f.fail()) f << s.str();
-			}
-			catch (std::exception&)
-			{
-				std::cerr << "WARNING: Unable to write the registry file." << std::endl;
-			}
+                auto wa = _groupsById.begin();
+                auto wb = _groupsById.end();
 
-			_isClean = true;
+                for (auto w = wa; w != wb; ) {
+                    auto p = w->second; w++;
 
-			_dataMutex.unlock();
-		}
-	}
+                    s << "\t\t" << "{" << endl;
+                    s << "\t\t\t" << "\"id\": " << (int)p->getId() << "," << endl;
+                    s << "\t\t\t" << "\"name\": " << "\"" << p->getName() << "\"" << "," << endl;
+                    s << "\t\t\t" << "\"levels\": " << "[";
 
-	tree* registry::spawnTree(uint16_t level, uint16_t groupId)
-	{
-		tree* p = new tree(level, groupId);
+                    auto za = p->beginIterator();
+                    auto zb = p->endIterator();
 
-		uint32_t id = TREE_ID(level, groupId);
+                    for (auto z = za; z != zb; ) {
+                        auto i = z->first; z++;
 
-		_allTrees.insert(std::pair<uint32_t, tree*>(id, p));
+                        s << (int)i;
 
-		auto t = _groupsById.find(id);
+                        if (z != zb) {
+                            s << ", ";
+                        }
+                    }
 
-		if (t == _groupsById.end())
-		{
-			std::cerr << "Something went wrong when trying to spawn a new tree." << std::endl;
-			exit(1111);
-		}
+                    s << "]" << endl;
+                    s << "\t\t" << "}";
 
-		t->second->addTree(p);
+                    if (w != wb) {
+                        s << ",";
+                    }
 
-		return p;
-	}
+                    s << endl;
+                }
 
-	group* registry::createGroup(uint16_t id, const std::string& name)
-	{
-		group* p = new group(id, name);
+                s << "\t" << "]" << endl;
+                s << "}" << endl;
 
-		_groupsById.insert(std::pair<uint16_t, group*>(id, p));
-		_groupsByName.insert(std::pair<std::string, group*>(name, p));
+                ofstream f(REGISTRY_FILENAME);
+                if (!f.fail()) {
+                    f << s.str();
+                }
+            } catch (std::exception &) {
+                cerr << "WARNING: Unable to write the registry file." << endl;
+            }
 
-		return p;
-	}
+            _isClean = true;
+
+            _dataMutex.unlock();
+        }
+    }
+
+    tree *registry::spawnTree(uint16_t level, uint16_t groupId) {
+        tree *p = new tree(level, groupId);
+
+        uint32_t id = TREE_ID(level, groupId);
+
+        _allTrees.insert(pair<uint32_t, tree *>(id, p));
+
+        auto t = _groupsById.find(id);
+
+        if (t == _groupsById.end()) {
+            cerr << "Something went wrong when trying to spawn a new tree." << endl;
+            exit(1111);
+        }
+
+        t->second->addTree(p);
+
+        return p;
+    }
+
+    group *registry::createGroup(uint16_t id, const string &name) {
+        group *p = new group(id, name);
+
+        _groupsById.insert(pair<uint16_t, group *>(id, p));
+        _groupsByName.insert(pair<string, group *>(name, p));
+
+        return p;
+    }
 }

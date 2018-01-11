@@ -1,23 +1,26 @@
 
 #include "server.h"
 
+using std::make_shared;
+using std::move;
+using boost::asio::io_service;
+using boost::system::error_code;
+
 //----------------------------------------------------------------------
 
-namespace geodis
-{
-	server::server(boost::asio::io_service& io_service, const tcp::endpoint& endpoint) : _acceptor(io_service, endpoint), _socket(io_service)
-	{
-		listen();
-	}
+namespace ecrp {
+    
+    server::server(io_service &ios, const tcp::endpoint &endpoint) : _acceptor(ios, endpoint), _socket(ios) {
+        listen();
+    }
 
-	void server::listen()
-	{
-		_acceptor.async_accept(_socket, [this](boost::system::error_code errcode)
-		{
-			if (!errcode)
-				std::make_shared<session>(std::move(_socket))->start();
+    void server::listen() {
+        _acceptor.async_accept(_socket, [this](error_code e) {
+            if (!e) {
+                make_shared<session>(move(_socket))->start();
+            }
 
-			listen();
-		});
-	}
+            listen();
+        });
+    }
 }

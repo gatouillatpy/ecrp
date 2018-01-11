@@ -3,6 +3,9 @@
 
 #include <boost/thread/thread.hpp>
 
+using boost::thread;
+using boost::mutex;
+
 #include "session.h"
 #include "request.h"
 #include "response.h"
@@ -10,43 +13,43 @@
 
 //----------------------------------------------------------------------
 
-namespace geodis
-{
-	class processor
-	{
-	public: // STATIC METHODS
+namespace ecrp {
+    
+    class processor {
+        
+        public: // STATIC METHODS
 
-		static void enqueueRequest(request* req);
+            static void enqueueRequest(request *req);
 
-	private: // MEMBERS
+        private: // MEMBERS
 
-		int _id;
+            int _id;
 
-		boost::thread _worker;
+            thread _worker;
 
-		boost::mutex _syncMutex;
+            mutex _syncMutex;
 
-		bool _isAlive;
+            bool _isAlive;
 
-	public: // CONSTRUCTORS
+        public: // CONSTRUCTORS
 
-		processor();
+            processor();
 
-		virtual ~processor();
+            virtual ~processor();
 
-	private: // METHODS
+        private: // METHODS
 
-		full_point getFullPointFromRequest(request* pRequest, response& res);
+            full_point getFullPointFromRequest(request *pRequest, response &res);
 
-		bool sendError(request* pRequest, response& res, int errCode);
-		bool sendAcknowledge(request* pRequest, response& res);
+            bool sendError(request *pRequest, response &res, int errCode);
+            bool sendAcknowledge(request *pRequest, response &res);
 
-		bool addPoint(request* pRequest, response& res);
-		bool removePoint(request* pRequest, response& res);
-		bool findPoints(request* pRequest, response& res);
+            bool addPoint(request *pRequest, response &res);
+            bool removePoint(request *pRequest, response &res);
+            bool findPoints(request *pRequest, response &res);
 
-		bool process(request* pRequest);
+            bool process(request *pRequest);
 
-		void workerLoop();
-	};
+            void workerLoop();
+    };
 }
