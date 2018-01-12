@@ -9,7 +9,7 @@ using std::string;
 
 namespace ecrp {
     
-    class error {
+    class Error {
         
         public: // CONSTANTS
 

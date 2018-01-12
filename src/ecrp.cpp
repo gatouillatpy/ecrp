@@ -2,9 +2,9 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
-#include "server.h"
-#include "registry.h"
-#include "processor.h"
+#include "server/Server.h"
+#include "geodis/Registry.h"
+#include "server/Processor.h"
 
 using std::exception;
 using std::cout;
@@ -117,18 +117,18 @@ int main(int argc, char *argv[]) {
 
     if (runServer) {
         try {
-            ecrp::registry::init(maxPagesInMemory);
+            ecrp::geodis::Registry::init(maxPagesInMemory);
 
-            vector<ecrp::processor *> processors;
+            vector<ecrp::server::Processor *> processors;
 
             for (int k = 0; k < processorCount; k++) {
-                processors.push_back(new ecrp::processor());
+                processors.push_back(new ecrp::server::Processor());
             }
 
             io_service ios;
             tcp::endpoint endpoint(tcp::v4(), localPort);
 
-            ecrp::server server(ios, endpoint);
+            ecrp::server::Server server(ios, endpoint);
 
             cout << "Started ecrp server on port " << localPort << " with " << processorCount << " processors." << endl;
 

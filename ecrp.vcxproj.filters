@@ -19,6 +19,30 @@
     <Filter Include="Header Files\zlib">
       <UniqueIdentifier>{b8cf06af-0d59-4b48-a885-2247bd107b38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{b1a7455c-2ef8-47f2-b9e3-40370b10dbd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{7fd499d1-3786-4de7-902d-f86fb525ea8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\errors">
+      <UniqueIdentifier>{f0726bc5-2292-4eee-8fb8-20fd04ddb158}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\errors">
+      <UniqueIdentifier>{2334ea63-820b-4e35-a556-78f5fd392884}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\server">
+      <UniqueIdentifier>{6d5eda20-9b87-4ac2-ad61-a919ffeb7241}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\server">
+      <UniqueIdentifier>{c078a135-cead-4f7f-8771-15a8cb22c5d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\geodis">
+      <UniqueIdentifier>{ee789873-a62f-42d7-9d02-56b6282a8e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\geodis">
+      <UniqueIdentifier>{d6c89f31-1eec-467d-8a7e-1574ba6a3514}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="zlib-1.2.8\adler32.c">
@@ -66,44 +90,44 @@
     <ClCompile Include="zlib-1.2.8\gzwrite.c">
       <Filter>Source Files\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\error.cpp">
+    <ClCompile Include="src\ECRP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ecrp.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\utils\compression.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\paging.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\utils\utils.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\point.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\server\Processor.cpp">
+      <Filter>Source Files\server</Filter>
     </ClCompile>
-    <ClCompile Include="src\processor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\server\Server.cpp">
+      <Filter>Source Files\server</Filter>
     </ClCompile>
-    <ClCompile Include="src\registry.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\server\Request.cpp">
+      <Filter>Source Files\server</Filter>
     </ClCompile>
-    <ClCompile Include="src\request.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\server\Response.cpp">
+      <Filter>Source Files\server</Filter>
     </ClCompile>
-    <ClCompile Include="src\response.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\server\Session.cpp">
+      <Filter>Source Files\server</Filter>
     </ClCompile>
-    <ClCompile Include="src\server.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\geodis\Paging.cpp">
+      <Filter>Source Files\geodis</Filter>
     </ClCompile>
-    <ClCompile Include="src\session.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\geodis\Point.cpp">
+      <Filter>Source Files\geodis</Filter>
     </ClCompile>
-    <ClCompile Include="src\tree.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\geodis\Registry.cpp">
+      <Filter>Source Files\geodis</Filter>
     </ClCompile>
-    <ClCompile Include="src\compression.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\geodis\Tree.cpp">
+      <Filter>Source Files\geodis</Filter>
     </ClCompile>
-    <ClCompile Include="src\utils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\errors\Error.cpp">
+      <Filter>Source Files\errors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,38 +164,38 @@
     <ClInclude Include="zlib-1.2.8\zlib.h">
       <Filter>Header Files\zlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\error.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\utils\compression.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="src\point.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\utils\utils.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="src\processor.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\server\Processor.h">
+      <Filter>Header Files\server</Filter>
     </ClInclude>
-    <ClInclude Include="src\registry.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\server\Server.h">
+      <Filter>Header Files\server</Filter>
     </ClInclude>
-    <ClInclude Include="src\request.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\server\Request.h">
+      <Filter>Header Files\server</Filter>
     </ClInclude>
-    <ClInclude Include="src\response.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\server\Response.h">
+      <Filter>Header Files\server</Filter>
     </ClInclude>
-    <ClInclude Include="src\server.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\server\Session.h">
+      <Filter>Header Files\server</Filter>
     </ClInclude>
-    <ClInclude Include="src\session.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\geodis\Registry.h">
+      <Filter>Header Files\geodis</Filter>
     </ClInclude>
-    <ClInclude Include="src\tree.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\geodis\Tree.h">
+      <Filter>Header Files\geodis</Filter>
     </ClInclude>
-    <ClInclude Include="src\compression.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\geodis\Point.h">
+      <Filter>Header Files\geodis</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\errors\Error.h">
+      <Filter>Header Files\errors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,31 +1,31 @@
 
-#include "error.h"
+#include "Error.h"
 
 //----------------------------------------------------------------------
 
 namespace ecrp {
     
-    const string error::getMessage(int code) {
+    const string Error::getMessage(int code) { // TODO: refactor that with a static map
         
         switch (code) {
-            case error::UNSPECIFIED_REQUEST_ID:
+            case Error::UNSPECIFIED_REQUEST_ID:
                 return "Unspecified request id.";
-            case error::UNSPECIFIED_REQUEST_TYPE:
+            case Error::UNSPECIFIED_REQUEST_TYPE:
                 return "Unspecified request type.";
-            case error::UNKNOWN_REQUEST_TYPE:
+            case Error::UNKNOWN_REQUEST_TYPE:
                 return "Unknown request type.";
-            case error::MISSING_ARGUMENT:
+            case Error::MISSING_ARGUMENT:
                 return "Missing request argument.";
-            case error::INVALID_COORDINATES:
+            case Error::INVALID_COORDINATES:
                 return "Invalid coordinates.";
-            case error::INVALID_LEVEL:
+            case Error::INVALID_LEVEL:
                 return "Invalid level.";
-            case error::INVALID_KEY:
+            case Error::INVALID_KEY:
                 return "Invalid key.";
-            case error::POINT_NOT_FOUND:
+            case Error::POINT_NOT_FOUND:
                 return "Point not found.";
             default:
-                return "Unknown error.";
+                return "Unknown Error.";
         }
     }
 }

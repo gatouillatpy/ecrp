@@ -11,19 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\error.cpp" />
-    <ClCompile Include="src\ecrp.cpp" />
-    <ClCompile Include="src\paging.cpp" />
-    <ClCompile Include="src\point.cpp" />
-    <ClCompile Include="src\processor.cpp" />
-    <ClCompile Include="src\registry.cpp" />
-    <ClCompile Include="src\request.cpp" />
-    <ClCompile Include="src\response.cpp" />
-    <ClCompile Include="src\server.cpp" />
-    <ClCompile Include="src\session.cpp" />
-    <ClCompile Include="src\tree.cpp" />
-    <ClCompile Include="src\compression.cpp" />
-    <ClCompile Include="src\utils.cpp" />
+    <ClCompile Include="src\ECRP.cpp" />
+    <ClCompile Include="src\errors\Error.cpp" />
+    <ClCompile Include="src\geodis\Paging.cpp" />
+    <ClCompile Include="src\geodis\Point.cpp" />
+    <ClCompile Include="src\geodis\Registry.cpp" />
+    <ClCompile Include="src\geodis\Tree.cpp" />
+    <ClCompile Include="src\server\Processor.cpp" />
+    <ClCompile Include="src\server\Request.cpp" />
+    <ClCompile Include="src\server\Response.cpp" />
+    <ClCompile Include="src\server\Server.cpp" />
+    <ClCompile Include="src\server\Session.cpp" />
+    <ClCompile Include="src\utils\compression.cpp" />
+    <ClCompile Include="src\utils\utils.cpp" />
     <ClCompile Include="zlib-1.2.8\adler32.c" />
     <ClCompile Include="zlib-1.2.8\compress.c" />
     <ClCompile Include="zlib-1.2.8\crc32.c" />
@@ -41,17 +41,17 @@
     <ClCompile Include="zlib-1.2.8\zutil.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\error.h" />
-    <ClInclude Include="src\point.h" />
-    <ClInclude Include="src\processor.h" />
-    <ClInclude Include="src\registry.h" />
-    <ClInclude Include="src\request.h" />
-    <ClInclude Include="src\response.h" />
-    <ClInclude Include="src\server.h" />
-    <ClInclude Include="src\session.h" />
-    <ClInclude Include="src\tree.h" />
-    <ClInclude Include="src\compression.h" />
-    <ClInclude Include="src\utils.h" />
+    <ClInclude Include="src\errors\Error.h" />
+    <ClInclude Include="src\geodis\Point.h" />
+    <ClInclude Include="src\geodis\Registry.h" />
+    <ClInclude Include="src\geodis\Tree.h" />
+    <ClInclude Include="src\server\Processor.h" />
+    <ClInclude Include="src\server\Request.h" />
+    <ClInclude Include="src\server\Response.h" />
+    <ClInclude Include="src\server\Server.h" />
+    <ClInclude Include="src\server\Session.h" />
+    <ClInclude Include="src\utils\compression.h" />
+    <ClInclude Include="src\utils\utils.h" />
     <ClInclude Include="zlib-1.2.8\crc32.h" />
     <ClInclude Include="zlib-1.2.8\deflate.h" />
     <ClInclude Include="zlib-1.2.8\gzguts.h" />
