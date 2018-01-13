@@ -12,7 +12,7 @@ namespace ecrp {
 
 		public: // METHODS
 
-			virtual const string& getType() { return "removePoints"; };
+			virtual string getType() { return "removePoints"; };
 			virtual bool process(Processor* pProcessor, Request *pRequest, Response &res);
 		};
 	}

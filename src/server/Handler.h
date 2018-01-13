@@ -15,7 +15,7 @@ namespace ecrp {
 
 		public: // METHODS
 
-			virtual const string& getType() = 0;
+			virtual string getType() = 0;
 			virtual bool process(Processor* pProcessor, Request *pRequest, Response &res) = 0;
 
 			virtual int getBinaryType() {
