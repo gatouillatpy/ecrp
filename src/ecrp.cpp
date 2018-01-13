@@ -2,9 +2,12 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
-#include "server/Server.h"
 #include "geodis/Registry.h"
+#include "server/Server.h"
 #include "server/Processor.h"
+#include "handlers/AddPointHandler.h"
+#include "handlers/RemovePointHandler.h"
+#include "handlers/FindPointsHandler.h"
 
 using std::exception;
 using std::cout;
@@ -118,6 +121,9 @@ int main(int argc, char *argv[]) {
     if (runServer) {
         try {
             ecrp::geodis::Registry::init(maxPagesInMemory);
+			ecrp::server::Processor::attachHandler(new ecrp::handlers::AddPointHandler());
+			ecrp::server::Processor::attachHandler(new ecrp::handlers::RemovePointHandler());
+			ecrp::server::Processor::attachHandler(new ecrp::handlers::FindPointsHandler());
 
             vector<ecrp::server::Processor *> processors;
 

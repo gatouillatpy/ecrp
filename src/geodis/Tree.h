@@ -10,6 +10,9 @@
 #include <boost/thread/thread.hpp>
 
 using std::unordered_map;
+using std::deque;
+using std::string;
+using std::vector;
 using boost::mutex;
 using boost::shared_mutex;
 
@@ -27,8 +30,8 @@ namespace ecrp {
 
 		private: // MEMBERS
 
-			std::unordered_map<int64_t, Leaf *> _leafPointers;
-			std::deque<int64_t> _leafPointersToRecycle;
+			unordered_map<int64_t, Leaf *> _leafPointers;
+			deque<int64_t> _leafPointersToRecycle;
 
 			uint16_t _level;
 			uint16_t _groupId;
@@ -40,7 +43,7 @@ namespace ecrp {
 
 			mutex _leafFileMutex;
 
-			std::string _recyclerFilename;
+			string _recyclerFilename;
 			mutex _recyclerMutex;
 			bool _recyclerDirty;
 
@@ -66,7 +69,7 @@ namespace ecrp {
 
 			void addPoint(uint32_t lat, uint32_t lon, uint64_t key);
 			bool removePoint(uint32_t lat, uint32_t lon, uint64_t key);
-			void findPoints(std::vector<FullPoint> &output, size_t limit, uint32_t minLat, uint32_t minLon, uint32_t maxLat, uint32_t maxLon);
+			void findPoints(vector<FullPoint> &output, size_t limit, uint32_t minLat, uint32_t minLon, uint32_t maxLat, uint32_t maxLon);
 
 			void releaseLeafFromMemory(int64_t p);
 

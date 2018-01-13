@@ -17,6 +17,10 @@
     <ClCompile Include="src\geodis\Point.cpp" />
     <ClCompile Include="src\geodis\Registry.cpp" />
     <ClCompile Include="src\geodis\Tree.cpp" />
+    <ClCompile Include="src\handlers\AddPointHandler.cpp" />
+    <ClCompile Include="src\handlers\FindPointsHandler.cpp" />
+    <ClCompile Include="src\handlers\GeodisHandler.cpp" />
+    <ClCompile Include="src\handlers\RemovePointHandler.cpp" />
     <ClCompile Include="src\server\Processor.cpp" />
     <ClCompile Include="src\server\Request.cpp" />
     <ClCompile Include="src\server\Response.cpp" />
@@ -45,6 +49,11 @@
     <ClInclude Include="src\geodis\Point.h" />
     <ClInclude Include="src\geodis\Registry.h" />
     <ClInclude Include="src\geodis\Tree.h" />
+    <ClInclude Include="src\handlers\AddPointHandler.h" />
+    <ClInclude Include="src\handlers\FindPointsHandler.h" />
+    <ClInclude Include="src\handlers\GeodisHandler.h" />
+    <ClInclude Include="src\handlers\RemovePointHandler.h" />
+    <ClInclude Include="src\server\Handler.h" />
     <ClInclude Include="src\server\Processor.h" />
     <ClInclude Include="src\server\Request.h" />
     <ClInclude Include="src\server\Response.h" />
@@ -96,14 +105,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0</IncludePath>
     <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib</LibraryPath>
     <OutDir>bin\debug\x86\</OutDir>
     <IntDir>tmp\debug\x86\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0</IncludePath>
     <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib</LibraryPath>
     <OutDir>bin\release\x86\</OutDir>
     <IntDir>tmp\release\x86\</IntDir>

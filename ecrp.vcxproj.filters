@@ -43,6 +43,12 @@
     <Filter Include="Source Files\geodis">
       <UniqueIdentifier>{d6c89f31-1eec-467d-8a7e-1574ba6a3514}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\handlers">
+      <UniqueIdentifier>{7585517b-503b-4491-820c-85cf9b12b77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\handlers">
+      <UniqueIdentifier>{cde53563-28cd-43c0-9bb6-3f398eb5d9b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="zlib-1.2.8\adler32.c">
@@ -129,6 +135,18 @@
     <ClCompile Include="src\errors\Error.cpp">
       <Filter>Source Files\errors</Filter>
     </ClCompile>
+    <ClCompile Include="src\handlers\GeodisHandler.cpp">
+      <Filter>Source Files\handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handlers\AddPointHandler.cpp">
+      <Filter>Source Files\handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handlers\RemovePointHandler.cpp">
+      <Filter>Source Files\handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handlers\FindPointsHandler.cpp">
+      <Filter>Source Files\handlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zlib-1.2.8\zutil.h">
@@ -196,6 +214,21 @@
     </ClInclude>
     <ClInclude Include="src\errors\Error.h">
       <Filter>Header Files\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\Handler.h">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handlers\GeodisHandler.h">
+      <Filter>Header Files\handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handlers\AddPointHandler.h">
+      <Filter>Header Files\handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handlers\FindPointsHandler.h">
+      <Filter>Header Files\handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handlers\RemovePointHandler.h">
+      <Filter>Header Files\handlers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

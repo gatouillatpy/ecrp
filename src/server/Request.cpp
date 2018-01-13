@@ -3,7 +3,7 @@
 
 #include "Request.h"
 #include "Session.h"
-#include "../utils/compression.h"
+#include "utils/compression.h"
 
 using std::istringstream;
 using boost::property_tree::ptree;
@@ -13,10 +13,6 @@ using boost::property_tree::read_json;
 
 namespace ecrp {
 	namespace server {
-
-		const string Request::ADD_POINT("add");
-		const string Request::REMOVE_POINT("remove");
-		const string Request::FIND_POINTS("find");
 
 		Request::Request() {
 			_contentHasBeenDeserialized = false;

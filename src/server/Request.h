@@ -26,10 +26,6 @@ namespace ecrp {
 
 			static const short MAX_LENGTH = 2048;
 
-			static const string ADD_POINT;
-			static const string REMOVE_POINT;
-			static const string FIND_POINTS;
-
 		private: // MEMBERS
 
 			short _length;

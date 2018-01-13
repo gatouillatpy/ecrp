@@ -3,7 +3,7 @@
 
 #include "Response.h"
 #include "Session.h"
-#include "../utils/compression.h"
+#include "utils/compression.h"
 
 using std::endl;
 using boost::asio::mutable_buffers_1;

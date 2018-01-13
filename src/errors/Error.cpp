@@ -14,7 +14,9 @@ namespace ecrp {
                 return "Unspecified request type.";
             case Error::UNKNOWN_REQUEST_TYPE:
                 return "Unknown request type.";
-            case Error::MISSING_ARGUMENT:
+			case Error::INVALID_REQUEST_TYPE:
+				return "Invalid request type.";
+			case Error::MISSING_ARGUMENT:
                 return "Missing request argument.";
             case Error::INVALID_COORDINATES:
                 return "Invalid coordinates.";

@@ -6,12 +6,10 @@
 using boost::thread;
 using boost::mutex;
 
-#include "Session.h"
+#include "Handler.h"
+//#include "Session.h"
 #include "Request.h"
 #include "Response.h"
-#include "../geodis/Point.h"
-
-using ecrp::geodis::FullPoint;
 
 //----------------------------------------------------------------------
 
@@ -22,7 +20,8 @@ namespace ecrp {
 
 		public: // STATIC METHODS
 
-			static void enqueueRequest(Request *req);
+			static void attachHandler(Handler *pHandler);
+			static void enqueueRequest(Request *pRequest);
 
 		private: // MEMBERS
 
@@ -40,22 +39,20 @@ namespace ecrp {
 
 			virtual ~Processor();
 
-		private: // METHODS
+		public: // METHODS
 
-			FullPoint getFullPointFromRequest(Request *pRequest, Response &res);
+			int getId() {
+				return _id;
+			};
 
 			bool sendError(Request *pRequest, Response &res, int errCode);
 			bool sendAcknowledge(Request *pRequest, Response &res);
 
-			bool addPoint(Request *pRequest, Response &res); // TODO: refactor this into a Service => processors use services
-			bool removePoint(Request *pRequest, Response &res);
-			bool findPoints(Request *pRequest, Response &res);
+		private: // METHODS
 
 			bool process(Request *pRequest);
 
 			void workerLoop();
 		};
-
-		static const FullPoint INVALID_POINT;
 	}
 }
