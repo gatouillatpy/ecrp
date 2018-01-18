@@ -49,6 +49,12 @@
     <Filter Include="Header Files\handlers">
       <UniqueIdentifier>{cde53563-28cd-43c0-9bb6-3f398eb5d9b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\blockchain">
+      <UniqueIdentifier>{53c619b0-af1f-4a7f-bcc6-eb3fc05f0008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\blockchain">
+      <UniqueIdentifier>{e04d5930-7f87-4d3c-b91c-6cee5cd62933}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="zlib-1.2.8\adler32.c">
@@ -147,6 +153,24 @@
     <ClCompile Include="src\handlers\FindPointsHandler.cpp">
       <Filter>Source Files\handlers</Filter>
     </ClCompile>
+    <ClCompile Include="src\blockchain\Blockchain.cpp">
+      <Filter>Source Files\blockchain</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\Block.cpp">
+      <Filter>Source Files\blockchain</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\MasterBlock.cpp">
+      <Filter>Source Files\blockchain</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\Transaction.cpp">
+      <Filter>Source Files\blockchain</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\TransactionInput.cpp">
+      <Filter>Source Files\blockchain</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\TransactionOutput.cpp">
+      <Filter>Source Files\blockchain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zlib-1.2.8\zutil.h">
@@ -229,6 +253,36 @@
     </ClInclude>
     <ClInclude Include="src\handlers\RemovePointHandler.h">
       <Filter>Header Files\handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\Blockchain.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\MasterBlock.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\Block.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\Hash.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\Transaction.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\TransactionInput.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\TransactionOutput.h">
+      <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\streams.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\byte.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\TransactionType.h">
+      <Filter>Header Files\blockchain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

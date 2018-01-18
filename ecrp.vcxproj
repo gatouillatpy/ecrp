@@ -11,6 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\blockchain\Block.cpp" />
+    <ClCompile Include="src\blockchain\Blockchain.cpp" />
+    <ClCompile Include="src\blockchain\MasterBlock.cpp" />
+    <ClCompile Include="src\blockchain\Transaction.cpp" />
+    <ClCompile Include="src\blockchain\TransactionInput.cpp" />
+    <ClCompile Include="src\blockchain\TransactionOutput.cpp" />
     <ClCompile Include="src\ECRP.cpp" />
     <ClCompile Include="src\errors\Error.cpp" />
     <ClCompile Include="src\geodis\Paging.cpp" />
@@ -45,6 +51,14 @@
     <ClCompile Include="zlib-1.2.8\zutil.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\blockchain\Block.h" />
+    <ClInclude Include="src\blockchain\Blockchain.h" />
+    <ClInclude Include="src\blockchain\Hash.h" />
+    <ClInclude Include="src\blockchain\MasterBlock.h" />
+    <ClInclude Include="src\blockchain\Transaction.h" />
+    <ClInclude Include="src\blockchain\TransactionInput.h" />
+    <ClInclude Include="src\blockchain\TransactionOutput.h" />
+    <ClInclude Include="src\blockchain\TransactionType.h" />
     <ClInclude Include="src\errors\Error.h" />
     <ClInclude Include="src\geodis\Point.h" />
     <ClInclude Include="src\geodis\Registry.h" />
@@ -59,6 +73,8 @@
     <ClInclude Include="src\server\Response.h" />
     <ClInclude Include="src\server\Server.h" />
     <ClInclude Include="src\server\Session.h" />
+    <ClInclude Include="src\utils\byte.h" />
+    <ClInclude Include="src\utils\streams.h" />
     <ClInclude Include="src\utils\compression.h" />
     <ClInclude Include="src\utils\utils.h" />
     <ClInclude Include="zlib-1.2.8\crc32.h" />
@@ -105,15 +121,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0</IncludePath>
-    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib</LibraryPath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0;C:\libgcrypt-1.8.2\dist\include</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib;C:\libgcrypt-1.8.2\dist\lib</LibraryPath>
     <OutDir>bin\debug\x86\</OutDir>
     <IntDir>tmp\debug\x86\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0</IncludePath>
-    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib</LibraryPath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0;C:\libgcrypt-1.8.2\dist\include</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib;C:\libgcrypt-1.8.2\dist\lib</LibraryPath>
     <OutDir>bin\release\x86\</OutDir>
     <IntDir>tmp\release\x86\</IntDir>
   </PropertyGroup>

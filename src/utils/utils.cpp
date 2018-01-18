@@ -1,6 +1,8 @@
 
 #include <string>
+#include <ctime>
 
+#include "byte.h"
 #include "utils.h"
 
 //----------------------------------------------------------------------
@@ -79,4 +81,8 @@ namespace ecrp {
 
         return c;
     }
+
+	uint32_t getTimestampUTC() {
+		return std::time(nullptr);
+	}
 }
