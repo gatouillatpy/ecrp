@@ -118,15 +118,13 @@ namespace ecrp {
 							}
 						}
 					}
-				}
-				catch (boost::exception &) {
+				} catch (boost::exception &) {
 					cerr << "Unable to read the Registry file." << endl;
 					exit(1101);
 				}
 
 				_isClean = true;
-			}
-			else {
+			} else {
 				_isClean = false;
 			}
 

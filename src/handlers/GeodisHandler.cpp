@@ -8,6 +8,7 @@
 #include "server/Processor.h"
 #include "geodis/Registry.h"
 #include "errors/Error.h"
+#include "utils/utils.h"
 
 using ecrp::geodis::Registry;
 
