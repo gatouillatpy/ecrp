@@ -118,10 +118,16 @@ void printUsage() {
 #include "crypto/Crypto.h"
 
 void testGCrypt() {
-	ecrp::crypto::hash256 t = ecrp::crypto::sha256("toto", 4);
-	cout << ecrp::crypto::to_string(t) << endl;
-	ecrp::crypto::test("216936D3CD6E53FEC0A4E231FDD6DC5C692CC7609525A7B2C9562D608F25D51A", 64);
-	//ecrp::crypto::test("216936D3CD6E53FEC0A4E231FDD6DC5C", 32);
+	using namespace ecrp::crypto;
+	std::string data = "toto";
+	PrivateKey privateKey = generatePrivateKey();
+	cout << "privateKey.q: " << to_string(privateKey.q) << endl;
+	cout << "privateKey.d: " << to_string(privateKey.d) << endl;
+	Signature signature = signData((void*)data.c_str(), data.size(), privateKey);
+	cout << "signature.r: " << to_string(signature.r) << endl;
+	cout << "signature.s: " << to_string(signature.s) << endl;
+	bool verified = verifyData((void*)data.c_str(), data.size(), signature, privateKey);
+	cout << "verified? " << std::to_string(verified) << endl;
 }
 
 int main(int argc, char *argv[]) {

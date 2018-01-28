@@ -29,7 +29,7 @@ namespace ecrp {
 			uint32_t _timestamp;
 			uint32_t _target;
 			uint64_t _nonce;
-			hash128 _rootHash;
+			b128 _rootHash;
 			vector<Transaction*> _transactions;
 
 		public: // CONSTRUCTORS

@@ -54,7 +54,7 @@ namespace ecrp {
 			Transaction* t = new Transaction(TransactionType::REWARD);
 			TransactionOutput* o = new TransactionOutput();
 			o->amount = 12;
-			o->address = hash128(); // TODO: replace with the real address
+			o->address = b128(); // TODO: replace with the real address
 			t->addOutput(o);
 			b->addTransaction(t);
 			mb->addBlock(b);

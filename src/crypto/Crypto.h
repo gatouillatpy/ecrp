@@ -14,9 +14,9 @@ using std::stringstream;
 namespace ecrp {
 	namespace crypto {
 
-		template<size_t s> struct generic_hash { byte b[s]; };
+		template<size_t s> struct generic_blob { byte b[s]; };
 
-		template<size_t s> string to_string(const generic_hash<s> &t) {
+		template<size_t s> string to_string(const generic_blob<s> &t) {
 			stringstream ss;
 			ss << std::hex;
 			for (int i(0); i < s; ++i) {
@@ -25,12 +25,28 @@ namespace ecrp {
 			return ss.str();
 		}
 
-		typedef generic_hash<16> hash128;
-		typedef generic_hash<32> hash256;
+		typedef generic_blob<16> b128;
+		typedef generic_blob<32> b256;
+		typedef generic_blob<57> b456;
 
-		hash256& sha256(void* inputData, size_t inputSize);
+		struct PublicKey {
+			b456 q;
+		};
 
-		void test(void* inputData, size_t inputSize);
+		struct PrivateKey : PublicKey {
+			b456 d; // TODO: make sure this is stored securely
+		};
+
+		struct Signature {
+			b456 r;
+			b456 s;
+		};
+
+		b256 sha256(void* inputData, size_t inputSize);
+
+		PrivateKey generatePrivateKey();
+		Signature signData(void* inputData, size_t inputSize, const PrivateKey& privateKey);
+		bool verifyData(void* inputData, size_t inputSize, const Signature& inputSignature, const PublicKey& publicKey);
 
 	}
 }

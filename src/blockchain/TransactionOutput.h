@@ -7,7 +7,7 @@
 #include "crypto/Crypto.h"
 
 using ecrp::io::be_ptr_istream;
-using ecrp::crypto::hash128;
+using ecrp::crypto::b128;
 
 //----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ namespace ecrp {
 		public: // MEMBERS
 
 			uint64_t amount;
-			hash128 address;
+			b128 address;
 
 		public: // METHODS
 

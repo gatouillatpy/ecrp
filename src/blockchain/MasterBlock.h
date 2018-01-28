@@ -9,7 +9,7 @@
 
 using std::vector;
 using ecrp::io::be_ptr_istream;
-using ecrp::crypto::hash256;
+using ecrp::crypto::b256;
 
 //----------------------------------------------------------------------
 
@@ -30,8 +30,8 @@ namespace ecrp {
 			uint32_t _timestamp;
 			uint32_t _target;
 			uint64_t _nonce;
-			hash256 _previousHash;
-			hash256 _masterHash;
+			b256 _previousHash;
+			b256 _masterHash;
 			vector<Block*> _blocks;
 
 		public: // CONSTRUCTORS
