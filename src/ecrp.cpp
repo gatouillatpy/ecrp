@@ -102,7 +102,7 @@ void parseArguments(int argc, char *argv[]) {
     }
 
     if (maxPagesInMemory != -1 && maxPagesInMemory < 256) {
-        cerr << "Argument 'maxPagesInMemory' out of range. It should be at least 256 or -1 to disable the paging system." << endl;
+		cerr << "Argument 'maxPagesInMemory' out of range. It should be at least 256 or -1 to disable the paging system." << endl;
         exit(1008);
     }
 }
@@ -115,7 +115,17 @@ void printUsage() {
     cout << "  -mp / --maxPagesInMemory" << endl;
 }
 
+#include "crypto/Crypto.h"
+
+void testGCrypt() {
+	ecrp::crypto::hash256 t = ecrp::crypto::sha256("toto", 4);
+	cout << ecrp::crypto::to_string(t) << endl;
+	ecrp::crypto::test("216936D3CD6E53FEC0A4E231FDD6DC5C692CC7609525A7B2C9562D608F25D51A", 64);
+	//ecrp::crypto::test("216936D3CD6E53FEC0A4E231FDD6DC5C", 32);
+}
+
 int main(int argc, char *argv[]) {
+	testGCrypt();
     parseArguments(argc, argv);
 
     if (runServer) {

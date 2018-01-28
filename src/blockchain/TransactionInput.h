@@ -4,9 +4,11 @@
 #include <cstdint>
 
 #include "utils/streams.h"
-#include "Hash.h"
+#include "crypto/Crypto.h"
 
 using ecrp::io::be_ptr_istream;
+using ecrp::crypto::hash128;
+using ecrp::crypto::hash256;
 
 //----------------------------------------------------------------------
 

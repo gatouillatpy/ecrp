@@ -17,6 +17,7 @@
     <ClCompile Include="src\blockchain\Transaction.cpp" />
     <ClCompile Include="src\blockchain\TransactionInput.cpp" />
     <ClCompile Include="src\blockchain\TransactionOutput.cpp" />
+    <ClCompile Include="src\crypto\Crypto.cpp" />
     <ClCompile Include="src\ECRP.cpp" />
     <ClCompile Include="src\errors\Error.cpp" />
     <ClCompile Include="src\geodis\Paging.cpp" />
@@ -53,12 +54,12 @@
   <ItemGroup>
     <ClInclude Include="src\blockchain\Block.h" />
     <ClInclude Include="src\blockchain\Blockchain.h" />
-    <ClInclude Include="src\blockchain\Hash.h" />
     <ClInclude Include="src\blockchain\MasterBlock.h" />
     <ClInclude Include="src\blockchain\Transaction.h" />
     <ClInclude Include="src\blockchain\TransactionInput.h" />
     <ClInclude Include="src\blockchain\TransactionOutput.h" />
     <ClInclude Include="src\blockchain\TransactionType.h" />
+    <ClInclude Include="src\crypto\Crypto.h" />
     <ClInclude Include="src\errors\Error.h" />
     <ClInclude Include="src\geodis\Point.h" />
     <ClInclude Include="src\geodis\Registry.h" />
@@ -121,15 +122,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0;C:\libgcrypt-1.8.2\dist\include</IncludePath>
-    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib;C:\libgcrypt-1.8.2\dist\lib</LibraryPath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0;C:\libgcrypt-1.8.2\dist\include;C:\libgpg-error-1.27\dist\include</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib;C:\libgcrypt-1.8.2\dist\lib\x86;C:\libgpg-error-1.27\dist\lib\x86</LibraryPath>
     <OutDir>bin\debug\x86\</OutDir>
     <IntDir>tmp\debug\x86\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0;C:\libgcrypt-1.8.2\dist\include</IncludePath>
-    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib;C:\libgcrypt-1.8.2\dist\lib</LibraryPath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)zlib-1.2.8;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(UniversalCRT_IncludePath);$(WindowsSDK_IncludePath);C:\boost_1_66_0;C:\libgcrypt-1.8.2\dist\include;C:\libgpg-error-1.27\dist\include</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(UniversalCRT_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\boost_1_66_0\stage\lib;C:\libgcrypt-1.8.2\dist\lib\x86;C:\libgpg-error-1.27\dist\lib\x86</LibraryPath>
     <OutDir>bin\release\x86\</OutDir>
     <IntDir>tmp\release\x86\</IntDir>
   </PropertyGroup>
@@ -144,6 +145,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libgcryptd.lib;libgpg-errord.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -160,6 +162,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libgcrypt.lib;libgpg-error.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>

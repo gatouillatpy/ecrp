@@ -55,6 +55,12 @@
     <Filter Include="Source Files\blockchain">
       <UniqueIdentifier>{e04d5930-7f87-4d3c-b91c-6cee5cd62933}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\crypto">
+      <UniqueIdentifier>{e4491279-e87c-4ab6-a75d-b574b455dd36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\crypto">
+      <UniqueIdentifier>{66fa667b-7054-4757-ba37-f30ee647718d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="zlib-1.2.8\adler32.c">
@@ -171,6 +177,9 @@
     <ClCompile Include="src\blockchain\TransactionOutput.cpp">
       <Filter>Source Files\blockchain</Filter>
     </ClCompile>
+    <ClCompile Include="src\crypto\Crypto.cpp">
+      <Filter>Source Files\crypto</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zlib-1.2.8\zutil.h">
@@ -263,9 +272,6 @@
     <ClInclude Include="src\blockchain\Block.h">
       <Filter>Header Files\blockchain</Filter>
     </ClInclude>
-    <ClInclude Include="src\blockchain\Hash.h">
-      <Filter>Header Files\blockchain</Filter>
-    </ClInclude>
     <ClInclude Include="src\blockchain\Transaction.h">
       <Filter>Header Files\blockchain</Filter>
     </ClInclude>
@@ -283,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="src\blockchain\TransactionType.h">
       <Filter>Header Files\blockchain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\crypto\Crypto.h">
+      <Filter>Header Files\crypto</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

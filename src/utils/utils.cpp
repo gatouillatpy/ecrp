@@ -83,6 +83,6 @@ namespace ecrp {
     }
 
 	uint32_t getTimestampUTC() {
-		return std::time(nullptr);
+		return (uint32_t)std::time(nullptr);
 	}
 }

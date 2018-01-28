@@ -6,7 +6,7 @@
 using std::vector;
 
 #include "utils/streams.h"
-#include "Hash.h"
+#include "crypto/Crypto.h"
 #include "TransactionInput.h"
 #include "TransactionOutput.h"
 

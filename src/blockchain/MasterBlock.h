@@ -4,11 +4,12 @@
 #include <vector>
 
 #include "utils/streams.h"
-#include "Hash.h"
+#include "crypto/Crypto.h"
 #include "Block.h"
 
 using std::vector;
 using ecrp::io::be_ptr_istream;
+using ecrp::crypto::hash256;
 
 //----------------------------------------------------------------------
 
