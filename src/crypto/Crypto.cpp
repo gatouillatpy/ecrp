@@ -8,7 +8,7 @@
 namespace ecrp {
 	namespace crypto {
 
-		static void	show_sexp(const char* prefix, gcry_sexp_t a) {
+		static void show_sexp(const char* prefix, gcry_sexp_t a) {
 			fputs(prefix, stderr);
 			size_t size = gcry_sexp_sprint(a, GCRYSEXP_FMT_ADVANCED, NULL, 0);
 			char* buf = (char*)malloc(size);
@@ -31,14 +31,25 @@ namespace ecrp {
 			return outputData;
 		}
 
-		PrivateKey generatePrivateKey() {
+		PrivateKey generateKey(const PrivateKey *input) {
 			PrivateKey output;
 			void* buffer;
 			uint32_t bufferSize;
 			gpg_error_t err;
 
 			gcry_sexp_t key_spec;
-			err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)))");
+			if (input) {
+				output.k = input->k + 1;
+				memcpy(&output.d, &input->d, sizeof(input->d));
+				size_t dlen = sizeof(output.d) + sizeof(output.k);
+				byte* dbuf = (byte*)malloc(dlen);
+				memcpy(dbuf, &output.d, sizeof(output.d));
+				memcpy(dbuf+sizeof(output.d), &output.k, sizeof(output.k));
+				err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)(secret %b)))", dlen, dbuf);
+				free(dbuf);
+			} else {
+				err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)))");
+			}
 			if (err) {
 				printf("Creating S-expression failed: %s\n", gcry_strerror(err));
 				return output;
@@ -57,7 +68,6 @@ namespace ecrp {
 				printf("Private part missing in key.\n");
 				return output;
 			}
-			show_sexp("private_key:\n", private_key);
 
 			gcry_sexp_t q_component;
 			q_component = gcry_sexp_find_token(private_key, "q", 0);
@@ -67,23 +77,33 @@ namespace ecrp {
 			}
 			buffer = (void*)gcry_sexp_nth_data(q_component, 1, &bufferSize);
 			memcpy(&output.q, buffer, sizeof(output.q));
-
-			gcry_sexp_t d_component;
-			d_component = gcry_sexp_find_token(private_key, "d", 0);
-			if (!d_component) {
-				printf("D component missing from the private key.\n");
-				return output;
-			}
-			buffer = (void*)gcry_sexp_nth_data(d_component, 1, &bufferSize);
-			memcpy(&output.d, buffer, sizeof(output.d));
-
-			gcry_sexp_release(d_component);
 			gcry_sexp_release(q_component);
+
+			if (!input) {
+				gcry_sexp_t d_component;
+				d_component = gcry_sexp_find_token(private_key, "d", 0);
+				if (!d_component) {
+					printf("D component missing from the private key.\n");
+					return output;
+				}
+				buffer = (void*)gcry_sexp_nth_data(d_component, 1, &bufferSize);
+				memcpy(&output.d, buffer, sizeof(output.d));
+				gcry_sexp_release(d_component);
+			}
+
 			gcry_sexp_release(private_key);
 			gcry_sexp_release(key_pair);
 			gcry_sexp_release(key_spec);
 
 			return output;
+		}
+
+		PrivateKey generateKey() {
+			return generateKey(NULL);
+		}
+
+		PrivateKey deriveKey(const PrivateKey& sourceKey) {
+			return generateKey(&sourceKey);
 		}
 
 		Signature signData(void* inputData, size_t inputSize, const PrivateKey& privateKey) {
@@ -103,12 +123,20 @@ namespace ecrp {
 				")\n";
 
 			gcry_sexp_t private_key;
-			err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(privateKey.q), &privateKey.q, sizeof(privateKey.d), &privateKey.d);
+			if (privateKey.k > 0) {
+				size_t dlen = sizeof(privateKey.d) + sizeof(privateKey.k);
+				byte* dbuf = (byte*)malloc(dlen);
+				memcpy(dbuf, &privateKey.d, sizeof(privateKey.d));
+				memcpy(dbuf + sizeof(privateKey.d), &privateKey.k, sizeof(privateKey.k));
+				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(privateKey.q), &privateKey.q, dlen, dbuf);
+				free(dbuf);
+			} else {
+				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(privateKey.q), &privateKey.q, sizeof(privateKey.d), &privateKey.d);
+			}
 			if (!private_key) {
 				printf("Loading private key failed: %s\n", gcry_strerror(err));
 				return output;
 			}
-			show_sexp("private_key:\n", private_key);
 
 			static const char data_format[] =
 				"(data\n"
@@ -123,7 +151,6 @@ namespace ecrp {
 				printf("Loading data failed: %s\n", gcry_strerror(err));
 				return output;
 			}
-			show_sexp("data:\n", data);
 
 			gcry_sexp_t signature;
 			err = gcry_pk_sign(&signature, data, private_key);
@@ -131,7 +158,6 @@ namespace ecrp {
 				printf("Signing data failed: %s\n", gcry_strerror(err));
 				return output;
 			}
-			show_sexp("signature:\n", signature);
 
 			gcry_sexp_t r_component;
 			r_component = gcry_sexp_find_token(signature, "r", 0);
@@ -178,7 +204,6 @@ namespace ecrp {
 				printf("Loading public key failed: %s\n", gcry_strerror(err));
 				return false;
 			}
-			show_sexp("public_key:\n", public_key);
 
 			static const char signature_format[] =
 				"(signature\n"
@@ -196,7 +221,6 @@ namespace ecrp {
 				printf("Loading signature failed: %s\n", gcry_strerror(err));
 				return false;
 			}
-			show_sexp("signature:\n", signature);
 
 			static const char data_format[] =
 				"(data\n"
@@ -211,7 +235,6 @@ namespace ecrp {
 				printf("Loading data failed: %s\n", gcry_strerror(err));
 				return false;
 			}
-			show_sexp("data:\n", data);
 
 			err = gcry_pk_verify(signature, data, public_key);
 			if (err) {

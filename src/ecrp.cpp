@@ -120,14 +120,22 @@ void printUsage() {
 void testGCrypt() {
 	using namespace ecrp::crypto;
 	std::string data = "toto";
-	PrivateKey privateKey = generatePrivateKey();
+	PrivateKey privateKey = generateKey();
 	cout << "privateKey.q: " << to_string(privateKey.q) << endl;
 	cout << "privateKey.d: " << to_string(privateKey.d) << endl;
 	Signature signature = signData((void*)data.c_str(), data.size(), privateKey);
 	cout << "signature.r: " << to_string(signature.r) << endl;
 	cout << "signature.s: " << to_string(signature.s) << endl;
 	bool verified = verifyData((void*)data.c_str(), data.size(), signature, privateKey);
-	cout << "verified? " << std::to_string(verified) << endl;
+	cout << "verified? " << std::to_string(verified) << endl << endl;
+	PrivateKey privateKey2 = deriveKey(privateKey);
+	cout << "privateKey2.q: " << to_string(privateKey2.q) << endl;
+	cout << "privateKey2.d: " << to_string(privateKey2.d) << endl;
+	Signature signature2 = signData((void*)data.c_str(), data.size(), privateKey2);
+	cout << "signature2.r: " << to_string(signature2.r) << endl;
+	cout << "signature2.s: " << to_string(signature2.s) << endl;
+	bool verified2 = verifyData((void*)data.c_str(), data.size(), signature2, privateKey2);
+	cout << "verified2? " << std::to_string(verified2) << endl << endl;
 }
 
 int main(int argc, char *argv[]) {

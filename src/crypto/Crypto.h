@@ -31,6 +31,9 @@ namespace ecrp {
 
 		struct PublicKey {
 			b456 q;
+			uint32_t k;
+
+			PublicKey() : k(0) {}
 		};
 
 		struct PrivateKey : PublicKey {
@@ -44,7 +47,8 @@ namespace ecrp {
 
 		b256 sha256(void* inputData, size_t inputSize);
 
-		PrivateKey generatePrivateKey();
+		PrivateKey generateKey();
+		PrivateKey deriveKey(const PrivateKey& sourceKey);
 		Signature signData(void* inputData, size_t inputSize, const PrivateKey& privateKey);
 		bool verifyData(void* inputData, size_t inputSize, const Signature& inputSignature, const PublicKey& publicKey);
 
