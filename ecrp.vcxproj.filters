@@ -61,6 +61,12 @@
     <Filter Include="Source Files\crypto">
       <UniqueIdentifier>{66fa667b-7054-4757-ba37-f30ee647718d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\bank">
+      <UniqueIdentifier>{6d5fca64-ad3d-4be7-9fb6-48c5b2efa64a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\bank">
+      <UniqueIdentifier>{cf62d7f5-7912-4d61-9b6e-aeef60c52b76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="zlib-1.2.8\adler32.c">
@@ -180,6 +186,12 @@
     <ClCompile Include="src\crypto\Crypto.cpp">
       <Filter>Source Files\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="src\bank\Bank.cpp">
+      <Filter>Source Files\bank</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bank\Wallet.cpp">
+      <Filter>Source Files\bank</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zlib-1.2.8\zutil.h">
@@ -292,6 +304,12 @@
     </ClInclude>
     <ClInclude Include="src\crypto\Crypto.h">
       <Filter>Header Files\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bank\Bank.h">
+      <Filter>Header Files\bank</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bank\Wallet.h">
+      <Filter>Header Files\bank</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

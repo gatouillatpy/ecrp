@@ -128,7 +128,7 @@ void testGCrypt() {
 	cout << "signature.s: " << to_string(signature.s) << endl;
 	bool verified = verifyData((void*)data.c_str(), data.size(), signature, privateKey);
 	cout << "verified? " << std::to_string(verified) << endl << endl;
-	PrivateKey privateKey2 = deriveKey(privateKey);
+	DerivativeKey privateKey2 = deriveKey(privateKey, 12);
 	cout << "privateKey2.q: " << to_string(privateKey2.q) << endl;
 	cout << "privateKey2.d: " << to_string(privateKey2.d) << endl;
 	Signature signature2 = signData((void*)data.c_str(), data.size(), privateKey2);
@@ -136,11 +136,19 @@ void testGCrypt() {
 	cout << "signature2.s: " << to_string(signature2.s) << endl;
 	bool verified2 = verifyData((void*)data.c_str(), data.size(), signature2, privateKey2);
 	cout << "verified2? " << std::to_string(verified2) << endl << endl;
+	std::string password = "azerty123";
+	b512 encryptedSecret = lockKey(privateKey, password);
+	cout << "encryptedSecret: " << to_string(encryptedSecret) << endl;
+	PrivateKey privateKey3 = unlockKey(encryptedSecret, password);
+	cout << "privateKey3.q: " << to_string(privateKey3.q) << endl;
+	cout << "privateKey3.d: " << to_string(privateKey3.d) << endl;
 }
 
 int main(int argc, char *argv[]) {
-	testGCrypt();
-    parseArguments(argc, argv);
+	for (int i = 0; i < 10000; i++) {
+		testGCrypt();
+	}
+	parseArguments(argc, argv);
 
     if (runServer) {
         try {

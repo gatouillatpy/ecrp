@@ -18,6 +18,7 @@ namespace ecrp {
 			_timestamp = timestamp;
 			_target = 0;
 			_nonce = 0;
+
 			memset(&_previousHash, 0, sizeof(_previousHash)); // TODO: create a dedicated function for that
 			memset(&_masterHash, 0, sizeof(_masterHash));
 		}

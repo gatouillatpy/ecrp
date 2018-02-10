@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\bank\Bank.cpp" />
+    <ClCompile Include="src\bank\Wallet.cpp" />
     <ClCompile Include="src\blockchain\Block.cpp" />
     <ClCompile Include="src\blockchain\Blockchain.cpp" />
     <ClCompile Include="src\blockchain\MasterBlock.cpp" />
@@ -52,6 +54,8 @@
     <ClCompile Include="zlib-1.2.8\zutil.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\bank\Bank.h" />
+    <ClInclude Include="src\bank\Wallet.h" />
     <ClInclude Include="src\blockchain\Block.h" />
     <ClInclude Include="src\blockchain\Blockchain.h" />
     <ClInclude Include="src\blockchain\MasterBlock.h" />
