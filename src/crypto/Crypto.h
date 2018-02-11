@@ -15,35 +15,69 @@ using std::stoul;
 namespace ecrp {
 	namespace crypto {
 
-		template<size_t n> struct generic_blob { byte b[n]; };
+		template<size_t n> struct generic_blob {
+			byte b[n];
 
-		template<size_t n> generic_blob<n> from_string(generic_blob<n> t, const string &s) {
-			for (int i(0); i < n; ++i) {
-				t.b[i] = (byte)stoul(s.substr(2 * i, 2), 0, 16);
+			generic_blob() {
+				for (int i(0); i < n; ++i) {
+					b[i] = 0;
+				}
 			}
-			return t;
-		}
 
-		template<size_t n> string to_string(const generic_blob<n> &t) {
-			stringstream ss;
-			ss << std::hex;
-			for (int i(0); i < n; ++i) {
-				ss << (int)t.b[i];
+			generic_blob(const string& s) {
+				for (int i(0); i < n; ++i) {
+					b[i] = (byte)stoul(s.substr(2 * i, 2), 0, 16);
+				}
 			}
-			return ss.str();
-		}
 
-		template<size_t n> generic_blob<n> shake256(const void* inputData, size_t inputSize, generic_blob<n> outputData) {
+			template<size_t z> bool equals(const generic_blob<z>& other) {
+				if (z == n) {
+					for (int i(0); i < n; ++i) {
+						if (b[i] != other.b[i]) {
+							return false;
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+
+			template<size_t z> bool equalsRegardlessOfSize(const generic_blob<z>& other) {
+				size_t w = min(n, z);
+
+				for (int i(0); i < w; ++i) {
+					if (b[i] != other.b[i]) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			string toString() {
+				stringstream ss;
+				ss << std::hex;
+				for (int i(0); i < n; ++i) {
+					ss << (int)b[i];
+				}
+				return ss.str();
+			}
+		};
+
+		template<size_t n> generic_blob<n> shake256(const void* pInputData, size_t inputSize, const generic_blob<n>& outputData) {
 			gcry_md_hd_t hd;
 			gpg_error_t err;
 			gcry_md_open(&hd, GCRY_MD_SHAKE256, 0);
-			gcry_md_write(hd, inputData, inputSize);
-			err = gcry_md_extract(hd, GCRY_MD_SHAKE256, &outputData, n);
+			gcry_md_write(hd, pInputData, inputSize);
+			err = gcry_md_extract(hd, GCRY_MD_SHAKE256, (void*)&outputData, n);
+			if (err) {
+				throw Error("Extracting hash failed: %s", gcry_strerror(err));
+			}
 			gcry_md_close(hd);
 			return outputData;
 		}
 
-		typedef generic_blob<16> b128;
+		typedef generic_blob<15> b120;
 		typedef generic_blob<32> b256;
 		typedef generic_blob<57> b456;
 		typedef generic_blob<64> b512;
@@ -72,14 +106,14 @@ namespace ecrp {
 			b456 s;
 		};
 
-		b256 sha256(void* inputData, size_t inputSize);
+		b256 sha256(const void* pInputData, size_t inputSize);
 
-		PrivateKey generateKey(const void* secretData, size_t secretSize, bool isRaw);
-		PrivateKey generateKey();
-		DerivativeKey deriveKey(const PrivateKey& sourceKey, uint32_t kValue);
-		Signature signData(void* inputData, size_t inputSize, const PrivateKey& privateKey);
-		bool verifyData(void* inputData, size_t inputSize, const Signature& inputSignature, const PublicKey& publicKey);
-		b512 lockKey(const PrivateKey& key, const string& password);
-		PrivateKey unlockKey(const b512& encryptedSecret, const string& password);
+		void generateKey(PrivateKey* pOutput, const void* pSecretData, size_t secretSize, bool isRaw);
+		PrivateKey* generateKey();
+		DerivativeKey* deriveKey(const PrivateKey* pSourceKey, uint32_t kValue);
+		Signature* signData(void* pInputData, size_t inputSize, const PrivateKey* pPrivateKey);
+		bool verifyData(void* pInputData, size_t inputSize, const Signature* pInputSignature, const PublicKey* pPublicKey);
+		b512* lockKey(const PrivateKey* pKey, const string& password);
+		PrivateKey* unlockKey(const b512* encryptedSecret, const string& password);
 	}
 }

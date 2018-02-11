@@ -1,13 +1,13 @@
 
 #pragma once
 
-#include <list>
+#include <unordered_map>
 
 #include "crypto/Crypto.h"
 #include "blockchain/Transaction.h"
 #include "Wallet.h"
 
-using std::list;
+using std::unordered_map;
 using std::string;
 using ecrp::crypto::b456;
 using ecrp::blockchain::Transaction;
@@ -21,7 +21,7 @@ namespace ecrp {
 
 		private: // MEMBERS
 
-			list<Wallet*> _wallets;
+			unordered_map<string, Wallet*> _wallets;
 
 		public: // CONSTRUCTORS
 
@@ -35,14 +35,14 @@ namespace ecrp {
 			void load();
 
 			Wallet* addWallet(Wallet* w);
-			Wallet* createWalletFromPassword(const string& password);
-			bool checkWalletPassword(uint32_t walletId, const string& passwordHash);
-			Wallet* getWalletById(uint32_t walletId);
-			b456 generateAddressForWallet(uint32_t walletId);
-			list<string> getAddressesForWallet(uint32_t walletId);
-			string getAddressForWallet(uint32_t walletId, b456 address);
-			int64_t getBalanceForAddress(b456 address);
-			Transaction* createTransaction(uint32_t walletId, b456 fromAddress, b456 toAddress, int64_t amount, b456 changeAddress);
+			void setWalletPassword(const string& walletId, const string& password);
+			bool checkWalletPassword(const string& walletId, const string& password);
+			Wallet* getWalletById(const string& walletId);
+			string generateAddressForWallet(const string& walletId);
+			list<string> getAddressesForWallet(const string& walletId);
+			string getAddressForWallet(const string& walletId, uint32_t addressNumber);
+			int64_t getBalanceForAddress(string address);
+			Transaction* createTransaction(const string& walletId, const string& fromAddress, const string& toAddress, int64_t amount, const string& changeAddress);
 		};
 	}
 }

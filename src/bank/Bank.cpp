@@ -1,9 +1,13 @@
 
+#include <stdexcept>
+
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 
 #include "Bank.h"
+#include "errors/Error.h"
 
+using std::runtime_error;
 using namespace boost::filesystem;
 
 //----------------------------------------------------------------------
@@ -35,42 +39,75 @@ namespace ecrp {
 		}
 
 		Wallet* Bank::addWallet(Wallet* w) {
-			_wallets.push_back(w);
+			_wallets[w->getId()] = w;
 			return w;
 		}
 
-		Wallet* Bank::createWalletFromPassword(const string& password) {
-			Wallet* w = new Wallet();
-			// TODO
-			return w;
+		void Bank::setWalletPassword(const string& walletId, const string& password) {
+			Wallet* w = getWalletById(walletId);
+			if (w) {
+				w->setPassword(password);
+			} else {
+				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
+			}
 		}
 
-		bool Bank::checkWalletPassword(uint32_t walletId, const string& passwordHash) {
-			return false; // TODO
+		bool Bank::checkWalletPassword(const string& walletId, const string& password) {
+			Wallet* w = getWalletById(walletId);
+			if (w) {
+				return w->checkPassword(password);
+			} else {
+				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
+			}
 		}
 
-		Wallet* Bank::getWalletById(uint32_t walletId) {
-			return NULL; // TODO
+		Wallet* Bank::getWalletById(const string& walletId) {
+			auto t = _wallets.find(walletId);
+			if (t != _wallets.end()) {
+				return t->second;
+			} else {
+				return NULL;
+			}
 		}
 
-		b456 Bank::generateAddressForWallet(uint32_t walletId) {
-			return b456(); // TODO
+		string Bank::generateAddressForWallet(const string& walletId) {
+			Wallet* w = getWalletById(walletId);
+			if (w) {
+				return w->generateAddress();
+			} else {
+				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
+			}
 		}
 
-		list<string> Bank::getAddressesForWallet(uint32_t walletId) {
-			return list<string>(); // TODO
+		list<string> Bank::getAddressesForWallet(const string& walletId) {
+			Wallet* w = getWalletById(walletId);
+			if (w) {
+				return w->getAddresses();
+			} else {
+				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
+			}
 		}
 
-		string Bank::getAddressForWallet(uint32_t walletId, b456 address) {
-			return ""; // TODO
+		string Bank::getAddressForWallet(const string& walletId, uint32_t addressNumber) {
+			Wallet* w = getWalletById(walletId);
+			if (w) {
+				return w->getAddress(addressNumber);
+			} else {
+				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
+			}
 		}
 
-		int64_t Bank::getBalanceForAddress(b456 address) {
-			return 0; // TODO
+		int64_t Bank::getBalanceForAddress(string address) {
+			return _blockchain->getBalanceForAddress(address);
 		}
 
-		Transaction* Bank::createTransaction(uint32_t walletId, b456 fromAddress, b456 toAddress, int64_t amount, b456 changeAddress) {
-			return NULL; // TODO
+		Transaction* Bank::createTransaction(const string& walletId, const string& fromAddress, const string& toAddress, int64_t amount, const string& changeAddress) {
+			Wallet* w = getWalletById(walletId);
+			if (w) {
+				return _blockchain->createTransaction(w->getPrivateKey(), fromAddress, toAddress, amount, changeAddress);
+			} else {
+				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
+			}
 		}
 
 	}

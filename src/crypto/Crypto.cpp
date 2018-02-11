@@ -1,7 +1,9 @@
 
+#include <memory>
 #include <gcrypt.h>
 
 #include "Crypto.h"
+#include "errors/Error.h"
 
 //----------------------------------------------------------------------
 
@@ -19,101 +21,105 @@ namespace ecrp {
 			printf("%.*s", (int)size, buf);
 		}
 
-		static void hash(int algo, const void* inputData, size_t inputSize, void* outputData, size_t outputSize) {
+		static void hash(int algo, const void* pInputData, size_t inputSize, void* pOutputData, size_t outputSize) {
 			gcry_md_hd_t hd;
-			gcry_md_open(&hd, algo, 0);
-			gcry_md_write(hd, inputData, inputSize);
+			gpg_error_t err;
+			err = gcry_md_open(&hd, algo, 0);
+			if (err) {
+				throw Error("Initializing hash algorithm failed: %s", gcry_strerror(err));
+			}
+			gcry_md_write(hd, pInputData, inputSize);
 			byte* hash = gcry_md_read(hd, algo);
-			memcpy(outputData, hash, outputSize);
+			if (hash == NULL) {
+				gcry_md_close(hd);
+				throw Error("Reading hash failed.");
+			}
+			memcpy(pOutputData, hash, outputSize);
 			gcry_md_close(hd);
 		}
 
-		b256 sha256(const void* inputData, size_t inputSize) {
+		b256 sha256(const void* pInputData, size_t inputSize) {
 			b256 outputData;
-			hash(GCRY_MD_SHA256, inputData, inputSize, &outputData, sizeof(outputData));
+			hash(GCRY_MD_SHA256, pInputData, inputSize, &outputData, sizeof(outputData));
 			return outputData;
 		}
 
-		PrivateKey generateKey(const void* secretData, size_t secretSize, bool isRaw) {
-			PrivateKey output;
+		void generateKey(PrivateKey* pOutput, const void* pSecretData, size_t secretSize, bool isRaw) {
 			void* buffer;
 			uint32_t bufferSize;
 			gpg_error_t err;
 
 			gcry_sexp_t key_spec;
-			if (secretData && secretSize) {
+			if (pSecretData && secretSize) {
 				if (isRaw) {
-					err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)(secret %b)))", secretSize, secretData);
+					err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)(secret %b)))", secretSize, pSecretData);
 				} else {
-					b456 d = shake256(secretData, secretSize, b456());
+					b456 d = shake256(pSecretData, secretSize, b456());
 					err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)(secret %b)))", sizeof(d), &d);
 				}
 			} else {
 				err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)))");
 			}
 			if (err) {
-				printf("Creating S-expression failed: %s\n", gcry_strerror(err));
-				return output;
+				throw Error("Creating S-expression failed: %s", gcry_strerror(err));
 			}
 
 			gcry_sexp_t key_pair;
 			err = gcry_pk_genkey(&key_pair, key_spec);
+			gcry_sexp_release(key_spec);
 			if (err) {
-				printf("Creating ECC key failed: %s\n", gcry_strerror(err));
-				return output;
+				throw Error("Creating ECC key failed: %s", gcry_strerror(err));
 			}
 
 			gcry_sexp_t private_key;
 			private_key = gcry_sexp_find_token(key_pair, "private-key", 0);
+			gcry_sexp_release(key_pair);
 			if (!private_key) {
-				printf("Private part missing in key.\n");
-				return output;
+				throw Error("Private part missing in key.");
 			}
 
 			gcry_sexp_t q_component;
 			q_component = gcry_sexp_find_token(private_key, "q", 0);
 			if (!q_component) {
-				printf("Q component missing from the private key.\n");
-				return output;
+				gcry_sexp_release(private_key);
+				throw Error("Q component missing from the private key.");
 			}
 			buffer = (void*)gcry_sexp_nth_data(q_component, 1, &bufferSize);
-			memcpy(&output.q, buffer, sizeof(output.q));
+			memcpy(&pOutput->q, buffer, sizeof(pOutput->q));
 			gcry_sexp_release(q_component);
 
 			gcry_sexp_t d_component;
 			d_component = gcry_sexp_find_token(private_key, "d", 0);
 			if (!d_component) {
-				printf("D component missing from the private key.\n");
-				return output;
+				gcry_sexp_release(private_key);
+				throw Error("D component missing from the private key.");
 			}
 			buffer = (void*)gcry_sexp_nth_data(d_component, 1, &bufferSize);
-			memcpy(&output.d, buffer, sizeof(output.d));
+			memcpy(&pOutput->d, buffer, sizeof(pOutput->d));
 			gcry_sexp_release(d_component);
 
 			gcry_sexp_release(private_key);
-			gcry_sexp_release(key_pair);
-			gcry_sexp_release(key_spec);
-
-			return output;
 		}
 
-		PrivateKey generateKey() {
-			return generateKey(NULL, 0, true);
+		PrivateKey* generateKey() {
+			PrivateKey output;
+			generateKey(&output, NULL, 0, true);
+			return new PrivateKey(output);
 		}
 
-		DerivativeKey deriveKey(const PrivateKey& sourceKey, uint32_t kValue) {
-			size_t secretSize = sizeof(sourceKey.d) + sizeof(kValue);
-			byte* secretData = (byte*)malloc(secretSize);
-			memcpy(secretData, &sourceKey.d, sizeof(sourceKey.d));
-			memcpy(secretData + sizeof(sourceKey.d), &kValue, sizeof(kValue));
-			DerivativeKey output = static_cast<DerivativeKey&>(generateKey(secretData, secretSize, false));
-			memcpy(&output.d, &sourceKey.d, sizeof(sourceKey.d));
+		DerivativeKey* deriveKey(const PrivateKey* pSourceKey, uint32_t kValue) {
+			size_t secretSize = sizeof(pSourceKey->d) + sizeof(kValue);
+			std::unique_ptr<byte> secretData(new byte[secretSize]);
+			memcpy(secretData.get(), &pSourceKey->d, sizeof(pSourceKey->d));
+			memcpy(secretData.get() + sizeof(pSourceKey->d), &kValue, sizeof(kValue));
+			DerivativeKey output;
+			generateKey(&output, secretData.get(), secretSize, false);
+			memcpy(&output.d, &pSourceKey->d, sizeof(pSourceKey->d));
 			output.k = kValue;
-			free(secretData);
-			return output;
+			return new DerivativeKey(output);
 		}
 
-		Signature signData(void* inputData, size_t inputSize, const PrivateKey& privateKey) {
+		Signature* signData(void* pInputData, size_t inputSize, const PrivateKey* pPrivateKey) {
 			Signature output;
 			void* buffer;
 			uint32_t bufferSize;
@@ -130,21 +136,19 @@ namespace ecrp {
 				")\n";
 
 			gcry_sexp_t private_key;
-			if (typeid(privateKey) == typeid(DerivativeKey)) {
-				const DerivativeKey& derivativeKey = static_cast<const DerivativeKey&>(privateKey);
-				size_t slen = sizeof(derivativeKey.d) + sizeof(derivativeKey.k);
-				byte* sbuf = (byte*)malloc(slen);
-				memcpy(sbuf, &derivativeKey.d, sizeof(derivativeKey.d));
-				memcpy(sbuf + sizeof(derivativeKey.d), &derivativeKey.k, sizeof(derivativeKey.k));
-				b456 d = shake256(sbuf, slen, b456());
-				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(derivativeKey.q), &derivativeKey.q, sizeof(d), &d);
-				free(sbuf);
+			if (typeid(*pPrivateKey) == typeid(DerivativeKey)) {
+				const DerivativeKey* pDerivativeKey = (const DerivativeKey*)(pPrivateKey);
+				size_t slen = sizeof(pDerivativeKey->d) + sizeof(pDerivativeKey->k);
+				std::unique_ptr<byte> sbuf(new byte[slen]);
+				memcpy(sbuf.get(), &pDerivativeKey->d, sizeof(pDerivativeKey->d));
+				memcpy(sbuf.get() + sizeof(pDerivativeKey->d), &pDerivativeKey->k, sizeof(pDerivativeKey->k));
+				b456 d = shake256(sbuf.get(), slen, b456());
+				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(pDerivativeKey->q), &pDerivativeKey->q, sizeof(d), &d);
 			} else {
-				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(privateKey.q), &privateKey.q, sizeof(privateKey.d), &privateKey.d);
+				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(pPrivateKey->q), &pPrivateKey->q, sizeof(pPrivateKey->d), &pPrivateKey->d);
 			}
-			if (!private_key) {
-				printf("Loading private key failed: %s\n", gcry_strerror(err));
-				return output;
+			if (err) {
+				throw Error("Loading private key failed: %s", gcry_strerror(err));
 			}
 
 			static const char data_format[] =
@@ -155,47 +159,45 @@ namespace ecrp {
 				")\n";
 
 			gcry_sexp_t data;
-			err = gcry_sexp_build(&data, NULL, data_format, inputSize, inputData);
+			err = gcry_sexp_build(&data, NULL, data_format, inputSize, pInputData);
 			if (err) {
-				printf("Loading data failed: %s\n", gcry_strerror(err));
-				return output;
+				gcry_sexp_release(private_key);
+				throw Error("Loading data failed: %s", gcry_strerror(err));
 			}
 
 			gcry_sexp_t signature;
 			err = gcry_pk_sign(&signature, data, private_key);
+			gcry_sexp_release(private_key);
+			gcry_sexp_release(data);
 			if (err) {
-				printf("Signing data failed: %s\n", gcry_strerror(err));
-				return output;
+				throw Error("Signing data failed: %s", gcry_strerror(err));
 			}
 
 			gcry_sexp_t r_component;
 			r_component = gcry_sexp_find_token(signature, "r", 0);
 			if (!r_component) {
-				printf("R component missing from the private key.\n");
-				return output;
+				gcry_sexp_release(signature);
+				throw Error("R component missing from the private key.");
 			}
 			buffer = (void*)gcry_sexp_nth_data(r_component, 1, &bufferSize);
 			memcpy(&output.r, buffer, sizeof(output.r));
+			gcry_sexp_release(r_component);
 
 			gcry_sexp_t s_component;
 			s_component = gcry_sexp_find_token(signature, "s", 0);
 			if (!s_component) {
-				printf("S component missing from the private key.\n");
-				return output;
+				gcry_sexp_release(signature);
+				throw Error("S component missing from the private key.");
 			}
 			buffer = (void*)gcry_sexp_nth_data(s_component, 1, &bufferSize);
 			memcpy(&output.s, buffer, sizeof(output.s));
-
 			gcry_sexp_release(s_component);
-			gcry_sexp_release(r_component);
-			gcry_sexp_release(signature);
-			gcry_sexp_release(data);
-			gcry_sexp_release(private_key);
 
-			return output;
+			gcry_sexp_release(signature);
+			return new Signature(output);
 		}
 
-		bool verifyData(void* inputData, size_t inputSize, const Signature& inputSignature, const PublicKey& publicKey) {
+		bool verifyData(void* pInputData, size_t inputSize, const Signature* pInputSignature, const PublicKey* pPublicKey) {
 			gpg_error_t err;
 
 			static const char public_key_format[] =
@@ -208,10 +210,9 @@ namespace ecrp {
 				")\n";
 
 			gcry_sexp_t public_key;
-			err = gcry_sexp_build(&public_key, NULL, public_key_format, sizeof(publicKey.q), &publicKey.q);
-			if (!public_key) {
-				printf("Loading public key failed: %s\n", gcry_strerror(err));
-				return false;
+			err = gcry_sexp_build(&public_key, NULL, public_key_format, sizeof(pPublicKey->q), &pPublicKey->q);
+			if (err) {
+				throw Error("Loading public key failed: %s", gcry_strerror(err));
 			}
 
 			static const char signature_format[] =
@@ -225,10 +226,10 @@ namespace ecrp {
 				")\n";
 
 			gcry_sexp_t signature;
-			err = gcry_sexp_build(&signature, NULL, signature_format, sizeof(inputSignature.r), &inputSignature.r, sizeof(inputSignature.s), &inputSignature.s);
-			if (!signature) {
-				printf("Loading signature failed: %s\n", gcry_strerror(err));
-				return false;
+			err = gcry_sexp_build(&signature, NULL, signature_format, sizeof(pInputSignature->r), &pInputSignature->r, sizeof(pInputSignature->s), &pInputSignature->s);
+			if (err) {
+				gcry_sexp_release(public_key);
+				throw Error("Loading signature failed: %s", gcry_strerror(err));
 			}
 
 			static const char data_format[] =
@@ -239,111 +240,104 @@ namespace ecrp {
 				")\n";
 
 			gcry_sexp_t data;
-			err = gcry_sexp_build(&data, NULL, data_format, inputSize, inputData);
+			err = gcry_sexp_build(&data, NULL, data_format, inputSize, pInputData);
 			if (err) {
-				printf("Loading data failed: %s\n", gcry_strerror(err));
-				return false;
+				gcry_sexp_release(signature);
+				gcry_sexp_release(public_key);
+				throw Error("Loading data failed: %s", gcry_strerror(err));
 			}
 
 			err = gcry_pk_verify(signature, data, public_key);
-			if (err) {
-				printf("Verifying data failed: %s\n", gcry_strerror(err));
-				return false;
-			}
-
-			gcry_sexp_release(public_key);
 			gcry_sexp_release(signature);
 			gcry_sexp_release(data);
+			gcry_sexp_release(public_key);
+			if (err) {
+				throw Error("Verifying data failed: %s", gcry_strerror(err));
+			}
 
 			return true;
 		}
 
-		b512 lockKey(const PrivateKey& key, const string& password) {
-			char hash[32];
+		b512* lockKey(const PrivateKey* pKey, const string& password) {
+			gpg_error_t err;
 
-			gcry_md_hd_t hd;
-			gcry_md_open(&hd, GCRY_MD_SHA256, 0);
-			gcry_md_write(hd, password.c_str(), password.size());
-			gcry_md_write(hd, aesSalt, sizeof(aesSalt) - 1);
-			memcpy(hash, gcry_md_read(hd, GCRY_MD_SHA256), sizeof(hash));
-			gcry_md_close(hd);
+			size_t slen = password.size() + sizeof(aesSalt) - 1;
+			std::unique_ptr<byte> sbuf(new byte[slen]);
+			memcpy(sbuf.get(), password.c_str(), password.size());
+			memcpy(sbuf.get() + password.size(), aesSalt, sizeof(aesSalt) - 1);
+			b256 hash = sha256(sbuf.get(), slen);
 
 			gcry_cipher_hd_t handle;
-			gpg_error_t err;
 			err = gcry_cipher_open(&handle, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, 0);
 			if (err) {
-				printf("Error in gcry_cipher_open\n");
-				return b512();
+				throw Error("Initializing cipher algorithm failed: %s", gcry_strerror(err));
 			}
 
-			err = gcry_cipher_setkey(handle, hash, sizeof(hash));
+			err = gcry_cipher_setkey(handle, &hash, sizeof(hash));
 			if (err) {
-				printf("Error in gcry_cipher_setkey\n");
-				return b512();
+				gcry_cipher_close(handle);
+				throw Error("Setting cipher key failed: %s", gcry_strerror(err));
 			}
 
 			err = gcry_cipher_setiv(handle, aesIV, sizeof(aesIV) - 1);
 			if (err) {
-				printf("Error in gcry_cipher_setiv\n");
-				return b512();
+				gcry_cipher_close(handle);
+				throw Error("Setting cipher IV failed: %s", gcry_strerror(err));
 			}
 
 			b512 input;
 			memset(&input, 0, sizeof(input));
-			memcpy(&input, &key.d, sizeof(key.d));
+			memcpy(&input, &pKey->d, sizeof(pKey->d));
 
 			b512 output;
 			err = gcry_cipher_encrypt(handle, &output, sizeof(output), &input, sizeof(input));
-			if (err) {
-				printf("Error in gcry_cipher_encrypt\n");
-				return b512();
-			}
 			gcry_cipher_close(handle);
-			return output;
+			if (err) {
+				throw Error("Encrypting data failed: %s", gcry_strerror(err));
+			}
+			return new b512(output);
 		}
 
-		PrivateKey unlockKey(const b512& input, const string& password) {
-			char hash[32];
+		PrivateKey* unlockKey(const b512* pInput, const string& password) {
+			gpg_error_t err;
 
-			gcry_md_hd_t hd;
-			gcry_md_open(&hd, GCRY_MD_SHA256, 0);
-			gcry_md_write(hd, password.c_str(), password.size());
-			gcry_md_write(hd, aesSalt, sizeof(aesSalt) - 1);
-			memcpy(hash, gcry_md_read(hd, GCRY_MD_SHA256), sizeof(hash));
-			gcry_md_close(hd);
+			size_t slen = password.size() + sizeof(aesSalt) - 1;
+			std::unique_ptr<byte> sbuf(new byte[slen]);
+			memcpy(sbuf.get(), password.c_str(), password.size());
+			memcpy(sbuf.get() + password.size(), aesSalt, sizeof(aesSalt) - 1);
+			b256 hash = sha256(sbuf.get(), slen);
 
 			gcry_cipher_hd_t handle;
-			gpg_error_t err;
 			err = gcry_cipher_open(&handle, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, 0);
 			if (err) {
-				printf("Error in gcry_cipher_open\n");
-				return PrivateKey();
+				throw Error("Initializing cipher algorithm failed: %s", gcry_strerror(err));
 			}
 
-			err = gcry_cipher_setkey(handle, hash, sizeof(hash));
+			err = gcry_cipher_setkey(handle, &hash, sizeof(hash));
 			if (err) {
-				printf("Error in gcry_cipher_setkey\n");
-				return PrivateKey();
+				gcry_cipher_close(handle);
+				throw Error("Setting cipher key failed: %s", gcry_strerror(err));
 			}
 
 			err = gcry_cipher_setiv(handle, aesIV, sizeof(aesIV) - 1);
 			if (err) {
-				printf("Error in gcry_cipher_setiv\n");
-				return PrivateKey();
+				gcry_cipher_close(handle);
+				throw Error("Setting cipher IV failed: %s", gcry_strerror(err));
 			}
 
-			b512 output;
-			err = gcry_cipher_decrypt(handle, &output, sizeof(output), &input, sizeof(input));
-			if (err) {
-				printf("Error in gcry_cipher_encrypt\n");
-				return PrivateKey();
-			}
+			b512 secret;
+			err = gcry_cipher_decrypt(handle, &secret, sizeof(secret), pInput, sizeof(*pInput));
 			gcry_cipher_close(handle);
+			if (err) {
+				throw Error("Decrypting data failed: %s", gcry_strerror(err));
+			}
 
-			b456 d = b456();
-			memcpy(&d, &output, sizeof(d));
+			b456 d;
+			memcpy(&d, &secret, sizeof(d));
 
-			return generateKey(&d, sizeof(d), true);
+			PrivateKey output;
+			generateKey(&output, &d, sizeof(d), true);
+			return new PrivateKey(output);
 		}
 	}
 }
