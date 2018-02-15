@@ -115,37 +115,43 @@ void printUsage() {
     cout << "  -mp / --maxPagesInMemory" << endl;
 }
 
+#include "utils/varints.h"
 #include "crypto/Crypto.h"
+
+void testVarint() {
+
+}
 
 void testGCrypt() {
 	using namespace ecrp::crypto;
 	std::string data = "toto";
 	PrivateKey* privateKey = generateKey();
-	cout << "privateKey.q: " << to_string(privateKey->q) << endl;
-	cout << "privateKey.d: " << to_string(privateKey->d) << endl;
+	cout << "privateKey.q: " << privateKey->q.toString() << endl;
+	cout << "privateKey.d: " << privateKey->d.toString() << endl;
 	Signature* signature = signData((void*)data.c_str(), data.size(), privateKey);
-	cout << "signature.r: " << to_string(signature->r) << endl;
-	cout << "signature.s: " << to_string(signature->s) << endl;
+	cout << "signature.r: " << signature->r.toString() << endl;
+	cout << "signature.s: " << signature->s.toString() << endl;
 	bool verified = verifyData((void*)data.c_str(), data.size(), signature, privateKey);
 	cout << "verified? " << std::to_string(verified) << endl << endl;
 	DerivativeKey* privateKey2 = deriveKey(privateKey, 12);
-	cout << "privateKey2.q: " << to_string(privateKey2->q) << endl;
-	cout << "privateKey2.d: " << to_string(privateKey2->d) << endl;
+	cout << "privateKey2.q: " << privateKey2->q.toString() << endl;
+	cout << "privateKey2.d: " << privateKey2->d.toString() << endl;
 	Signature* signature2 = signData((void*)data.c_str(), data.size(), privateKey2);
-	cout << "signature2.r: " << to_string(signature2->r) << endl;
-	cout << "signature2.s: " << to_string(signature2->s) << endl;
+	cout << "signature2.r: " << signature2->r.toString() << endl;
+	cout << "signature2.s: " << signature2->s.toString() << endl;
 	bool verified2 = verifyData((void*)data.c_str(), data.size(), signature2, privateKey2);
 	cout << "verified2? " << std::to_string(verified2) << endl << endl;
 	std::string password = "azerty123";
 	b512* encryptedSecret = lockKey(privateKey, password);
-	cout << "encryptedSecret: " << to_string(*encryptedSecret) << endl;
+	cout << "encryptedSecret: " << encryptedSecret->toString() << endl;
 	PrivateKey* privateKey3 = unlockKey(encryptedSecret, password);
-	cout << "privateKey3.q: " << to_string(privateKey3->q) << endl;
-	cout << "privateKey3.d: " << to_string(privateKey3->d) << endl;
+	cout << "privateKey3.q: " << privateKey3->q.toString() << endl;
+	cout << "privateKey3.d: " << privateKey3->d.toString() << endl;
 }
 
 int main(int argc, char *argv[]) {
 	for (int i = 0; i < 10000; i++) {
+		testVarint();
 		testGCrypt();
 	}
 	parseArguments(argc, argv);

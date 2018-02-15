@@ -13,7 +13,8 @@ namespace ecrp {
 		void TransactionInput::deserialize(be_ptr_istream& stream) {
 			stream >> source;
 			stream >> sourceOutputId;
-			stream >> signature;
+			stream >> signatureR;
+			stream >> signatureS;
 			stream >> publicKey;
 		}
 	}

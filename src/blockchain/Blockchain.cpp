@@ -52,13 +52,13 @@ namespace ecrp {
 			MasterBlock* mb = new MasterBlock(0, timestamp);
 			Block* b = new Block(timestamp);
 			Transaction* t = new Transaction(TransactionType::REWARD);
-			TransactionOutput* o = new TransactionOutput();
+			/*TransactionOutput* o = new TransactionOutput();
 			o->amount = 12;
 			o->address = b128(); // TODO: replace with the real address
 			t->addOutput(o);
 			b->addTransaction(t);
 			mb->addBlock(b);
-			_data.push_back(mb);
+			_data.push_back(mb);*/
 		}
 	}
 }

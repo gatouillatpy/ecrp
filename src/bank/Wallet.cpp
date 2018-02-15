@@ -195,7 +195,7 @@ namespace ecrp {
 
 			b120 fromAddressRaw(fromAddress);
 
-			for (auto i = _derivativeKeys.begin(); i != _derivativeKeys.end(); ++i) {
+			/*for (auto i = _derivativeKeys.begin(); i != _derivativeKeys.end(); ++i) {
 				auto t = *i;
 				t->q
 
@@ -212,7 +212,7 @@ namespace ecrp {
 			i->
 
 			Transaction t;
-			t.addInput()
+			t.addInput()*/
 		}
 	}
 }

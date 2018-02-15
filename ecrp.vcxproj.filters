@@ -67,6 +67,12 @@
     <Filter Include="Source Files\bank">
       <UniqueIdentifier>{cf62d7f5-7912-4d61-9b6e-aeef60c52b76}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\blockchain\transactions">
+      <UniqueIdentifier>{6c3a95b8-c66f-4c74-bab9-cfb5d862acc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\blockchain\transactions">
+      <UniqueIdentifier>{d38f8978-a486-4255-8fb2-1ccfed4b6dd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="zlib-1.2.8\adler32.c">
@@ -177,12 +183,6 @@
     <ClCompile Include="src\blockchain\Transaction.cpp">
       <Filter>Source Files\blockchain</Filter>
     </ClCompile>
-    <ClCompile Include="src\blockchain\TransactionInput.cpp">
-      <Filter>Source Files\blockchain</Filter>
-    </ClCompile>
-    <ClCompile Include="src\blockchain\TransactionOutput.cpp">
-      <Filter>Source Files\blockchain</Filter>
-    </ClCompile>
     <ClCompile Include="src\crypto\Crypto.cpp">
       <Filter>Source Files\crypto</Filter>
     </ClCompile>
@@ -191,6 +191,18 @@
     </ClCompile>
     <ClCompile Include="src\bank\Wallet.cpp">
       <Filter>Source Files\bank</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\transactions\BasicTransaction.cpp">
+      <Filter>Source Files\blockchain\transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\transactions\TransactionInput.cpp">
+      <Filter>Source Files\blockchain\transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blockchain\transactions\TransactionOutput.cpp">
+      <Filter>Source Files\blockchain\transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\varints.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -287,12 +299,6 @@
     <ClInclude Include="src\blockchain\Transaction.h">
       <Filter>Header Files\blockchain</Filter>
     </ClInclude>
-    <ClInclude Include="src\blockchain\TransactionInput.h">
-      <Filter>Header Files\blockchain</Filter>
-    </ClInclude>
-    <ClInclude Include="src\blockchain\TransactionOutput.h">
-      <Filter>Header Files\blockchain</Filter>
-    </ClInclude>
     <ClInclude Include="src\utils\streams.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
@@ -310,6 +316,18 @@
     </ClInclude>
     <ClInclude Include="src\bank\Wallet.h">
       <Filter>Header Files\bank</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\transactions\BasicTransaction.h">
+      <Filter>Header Files\blockchain\transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\transactions\TransactionInput.h">
+      <Filter>Header Files\blockchain\transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockchain\transactions\TransactionOutput.h">
+      <Filter>Header Files\blockchain\transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\varints.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

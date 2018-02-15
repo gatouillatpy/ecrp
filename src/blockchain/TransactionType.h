@@ -12,7 +12,7 @@ namespace ecrp {
 
 		public: // CONSTANTS
 
-			static const uint8_t REGULAR = 1;
+			static const uint8_t BASIC = 1;
 			static const uint8_t FEE = 2;
 			static const uint8_t REWARD = 3;
 

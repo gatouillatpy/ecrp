@@ -1,14 +1,8 @@
 
 #pragma once
 
-#include <vector>
-
-using std::vector;
-
 #include "utils/streams.h"
 #include "crypto/Crypto.h"
-#include "TransactionInput.h"
-#include "TransactionOutput.h"
 
 using ecrp::io::be_ptr_istream;
 
@@ -17,21 +11,17 @@ using ecrp::io::be_ptr_istream;
 namespace ecrp {
 	namespace blockchain {
 
-		// NB: transactions should be split based on their inputs' previous tx address in order to prevent double spending? 
-
 		class Transaction {
 
-		private: // CONSTANTS
+		protected: // CONSTANTS
 
 			static const uint16_t MIN_COMPATIBLE_VERSION = 1;
 			static const uint16_t CURRENT_VERSION = 1;
 
-		private: // MEMBERS
+		protected: // MEMBERS
 
 			uint16_t _version;
 			uint8_t _type;
-			vector<TransactionInput*> _inputs;
-			vector<TransactionOutput*> _outputs;
 
 		public: // CONSTRUCTORS
 
@@ -42,10 +32,7 @@ namespace ecrp {
 
 		public: // METHODS
 
-			void deserialize(be_ptr_istream& stream);
-
-			void addInput(TransactionInput* i);
-			void addOutput(TransactionOutput* o);
+			virtual void deserialize(be_ptr_istream& stream);
 
 		};
 	}

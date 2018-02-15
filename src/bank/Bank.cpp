@@ -98,16 +98,18 @@ namespace ecrp {
 		}
 
 		int64_t Bank::getBalanceForAddress(string address) {
-			return _blockchain->getBalanceForAddress(address);
+			return 0; // TODO
+			/*return _blockchain->getBalanceForAddress(address);*/
 		}
 
 		Transaction* Bank::createTransaction(const string& walletId, const string& fromAddress, const string& toAddress, int64_t amount, const string& changeAddress) {
-			Wallet* w = getWalletById(walletId);
+			return 0; // TODO
+			/*Wallet* w = getWalletById(walletId);
 			if (w) {
 				return _blockchain->createTransaction(w->getPrivateKey(), fromAddress, toAddress, amount, changeAddress);
 			} else {
 				throw Error("Unable to find the wallet with id '%s'.", walletId.c_str());
-			}
+			}*/
 		}
 
 	}
