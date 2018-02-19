@@ -117,6 +117,7 @@ void printUsage() {
 
 #include "utils/varints.h"
 #include "crypto/Crypto.h"
+#include "errors/Error.h"
 
 void testVarint() {
 
@@ -124,36 +125,60 @@ void testVarint() {
 
 void testGCrypt() {
 	using namespace ecrp::crypto;
-	std::string data = "toto";
-	PrivateKey* privateKey = generateKey();
+	try {
+		std::string data = "toto";
+		PrivateKey* privateKey = generateKey();
+		cout << "privateKey.q: " << privateKey->q.toString() << endl;
+		cout << "privateKey.d: " << privateKey->d.toString() << endl;
+		Signature* signature = signData((void*)data.c_str(), data.size(), privateKey);
+		cout << "signature.r: " << signature->r.toString() << endl;
+		cout << "signature.s: " << signature->s.toString() << endl;
+		bool verified = verifyData((void*)data.c_str(), data.size(), signature, privateKey);
+		cout << "verified? " << std::to_string(verified) << endl << endl;
+		DerivativeKey* privateKey2 = deriveKey(privateKey, 12);
+		cout << "privateKey2.q: " << privateKey2->q.toString() << endl;
+		cout << "privateKey2.d: " << privateKey2->d.toString() << endl;
+		Signature* signature2 = signData((void*)data.c_str(), data.size(), privateKey2);
+		cout << "signature2.r: " << signature2->r.toString() << endl;
+		cout << "signature2.s: " << signature2->s.toString() << endl;
+		bool verified2 = verifyData((void*)data.c_str(), data.size(), signature2, privateKey2);
+		cout << "verified2? " << std::to_string(verified2) << endl;
+		std::string password = "azerty123";
+		b512* encryptedSecret = lockKey(privateKey, password);
+		cout << "encryptedSecret: " << encryptedSecret->toString() << endl;
+		PrivateKey* privateKey3 = unlockKey(encryptedSecret, password);
+		cout << "privateKey3.q: " << privateKey3->q.toString() << endl;
+		cout << "privateKey3.d: " << privateKey3->d.toString() << endl;
+		cout << endl;
+	} catch (const ecrp::Error& e) {
+		cerr << e.what() << endl;
+	}
+}
+
+void testGCrypt168() {
+	using namespace ecrp::crypto;
+	//b456 secret("fc00d7d99391756544fea3c028f48f72e9e16bd56bf0");
+	b456 secret("8b58421f373ba377a8c8f3b433cbf01e896a3d045d41");
+	b456 msg("ad744818d4d0e6e34dd4d5f6cc41f8a85edb50f4a28d");
+	PrivateKey* privateKey = new PrivateKey();
+	generateKey(privateKey, &secret, sizeof(secret), true);
 	cout << "privateKey.q: " << privateKey->q.toString() << endl;
 	cout << "privateKey.d: " << privateKey->d.toString() << endl;
-	Signature* signature = signData((void*)data.c_str(), data.size(), privateKey);
+	Signature* signature = signData(&msg, sizeof(msg), privateKey);
 	cout << "signature.r: " << signature->r.toString() << endl;
 	cout << "signature.s: " << signature->s.toString() << endl;
-	bool verified = verifyData((void*)data.c_str(), data.size(), signature, privateKey);
+	bool verified = verifyData(&msg, sizeof(msg), signature, privateKey);
 	cout << "verified? " << std::to_string(verified) << endl << endl;
-	DerivativeKey* privateKey2 = deriveKey(privateKey, 12);
-	cout << "privateKey2.q: " << privateKey2->q.toString() << endl;
-	cout << "privateKey2.d: " << privateKey2->d.toString() << endl;
-	Signature* signature2 = signData((void*)data.c_str(), data.size(), privateKey2);
-	cout << "signature2.r: " << signature2->r.toString() << endl;
-	cout << "signature2.s: " << signature2->s.toString() << endl;
-	bool verified2 = verifyData((void*)data.c_str(), data.size(), signature2, privateKey2);
-	cout << "verified2? " << std::to_string(verified2) << endl << endl;
-	std::string password = "azerty123";
-	b512* encryptedSecret = lockKey(privateKey, password);
-	cout << "encryptedSecret: " << encryptedSecret->toString() << endl;
-	PrivateKey* privateKey3 = unlockKey(encryptedSecret, password);
-	cout << "privateKey3.q: " << privateKey3->q.toString() << endl;
-	cout << "privateKey3.d: " << privateKey3->d.toString() << endl;
 }
 
 int main(int argc, char *argv[]) {
-	for (int i = 0; i < 10000; i++) {
+	//testGCrypt168();
+	for (int i = 0; i < 200; i++) {
 		testVarint();
 		testGCrypt();
 	}
+	_CrtDumpMemoryLeaks();
+	return 0;
 	parseArguments(argc, argv);
 
     if (runServer) {

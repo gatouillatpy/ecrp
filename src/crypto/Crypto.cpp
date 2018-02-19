@@ -26,7 +26,7 @@ namespace ecrp {
 			gpg_error_t err;
 			err = gcry_md_open(&hd, algo, 0);
 			if (err) {
-				throw Error("Initializing hash algorithm failed: %s", gcry_strerror(err));
+				throw Error("Initializing hash algorithm failed: %d", err);
 			}
 			gcry_md_write(hd, pInputData, inputSize);
 			byte* hash = gcry_md_read(hd, algo);
@@ -61,14 +61,14 @@ namespace ecrp {
 				err = gcry_sexp_build(&key_spec, NULL, "(genkey (ecdsa (curve \"Ed448\")(flags eddsa)))");
 			}
 			if (err) {
-				throw Error("Creating S-expression failed: %s", gcry_strerror(err));
+				throw Error("Creating S-expression failed: %d", err);
 			}
 
 			gcry_sexp_t key_pair;
 			err = gcry_pk_genkey(&key_pair, key_spec);
 			gcry_sexp_release(key_spec);
 			if (err) {
-				throw Error("Creating ECC key failed: %s", gcry_strerror(err));
+				throw Error("Creating ECC key failed: %d", err);
 			}
 
 			gcry_sexp_t private_key;
@@ -148,7 +148,7 @@ namespace ecrp {
 				err = gcry_sexp_build(&private_key, NULL, private_key_format, sizeof(pPrivateKey->q), &pPrivateKey->q, sizeof(pPrivateKey->d), &pPrivateKey->d);
 			}
 			if (err) {
-				throw Error("Loading private key failed: %s", gcry_strerror(err));
+				throw Error("Loading private key failed: %d", err);
 			}
 
 			static const char data_format[] =
@@ -162,7 +162,7 @@ namespace ecrp {
 			err = gcry_sexp_build(&data, NULL, data_format, inputSize, pInputData);
 			if (err) {
 				gcry_sexp_release(private_key);
-				throw Error("Loading data failed: %s", gcry_strerror(err));
+				throw Error("Loading data failed: %d", err);
 			}
 
 			gcry_sexp_t signature;
@@ -170,7 +170,7 @@ namespace ecrp {
 			gcry_sexp_release(private_key);
 			gcry_sexp_release(data);
 			if (err) {
-				throw Error("Signing data failed: %s", gcry_strerror(err));
+				throw Error("Signing data failed: %d", err);
 			}
 
 			gcry_sexp_t r_component;
@@ -212,7 +212,7 @@ namespace ecrp {
 			gcry_sexp_t public_key;
 			err = gcry_sexp_build(&public_key, NULL, public_key_format, sizeof(pPublicKey->q), &pPublicKey->q);
 			if (err) {
-				throw Error("Loading public key failed: %s", gcry_strerror(err));
+				throw Error("Loading public key failed: %d", err);
 			}
 
 			static const char signature_format[] =
@@ -229,7 +229,7 @@ namespace ecrp {
 			err = gcry_sexp_build(&signature, NULL, signature_format, sizeof(pInputSignature->r), &pInputSignature->r, sizeof(pInputSignature->s), &pInputSignature->s);
 			if (err) {
 				gcry_sexp_release(public_key);
-				throw Error("Loading signature failed: %s", gcry_strerror(err));
+				throw Error("Loading signature failed: %d", err);
 			}
 
 			static const char data_format[] =
@@ -244,7 +244,7 @@ namespace ecrp {
 			if (err) {
 				gcry_sexp_release(signature);
 				gcry_sexp_release(public_key);
-				throw Error("Loading data failed: %s", gcry_strerror(err));
+				throw Error("Loading data failed: %d", err);
 			}
 
 			err = gcry_pk_verify(signature, data, public_key);
@@ -252,7 +252,7 @@ namespace ecrp {
 			gcry_sexp_release(data);
 			gcry_sexp_release(public_key);
 			if (err) {
-				throw Error("Verifying data failed: %s", gcry_strerror(err));
+				throw Error("Verifying data failed: %d", err);
 			}
 
 			return true;
@@ -270,19 +270,19 @@ namespace ecrp {
 			gcry_cipher_hd_t handle;
 			err = gcry_cipher_open(&handle, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, 0);
 			if (err) {
-				throw Error("Initializing cipher algorithm failed: %s", gcry_strerror(err));
+				throw Error("Initializing cipher algorithm failed: %d", err);
 			}
 
 			err = gcry_cipher_setkey(handle, &hash, sizeof(hash));
 			if (err) {
 				gcry_cipher_close(handle);
-				throw Error("Setting cipher key failed: %s", gcry_strerror(err));
+				throw Error("Setting cipher key failed: %d", err);
 			}
 
 			err = gcry_cipher_setiv(handle, aesIV, sizeof(aesIV) - 1);
 			if (err) {
 				gcry_cipher_close(handle);
-				throw Error("Setting cipher IV failed: %s", gcry_strerror(err));
+				throw Error("Setting cipher IV failed: %d", err);
 			}
 
 			b512 input;
@@ -293,7 +293,7 @@ namespace ecrp {
 			err = gcry_cipher_encrypt(handle, &output, sizeof(output), &input, sizeof(input));
 			gcry_cipher_close(handle);
 			if (err) {
-				throw Error("Encrypting data failed: %s", gcry_strerror(err));
+				throw Error("Encrypting data failed: %d", err);
 			}
 			return new b512(output);
 		}
@@ -310,26 +310,26 @@ namespace ecrp {
 			gcry_cipher_hd_t handle;
 			err = gcry_cipher_open(&handle, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, 0);
 			if (err) {
-				throw Error("Initializing cipher algorithm failed: %s", gcry_strerror(err));
+				throw Error("Initializing cipher algorithm failed: %d", err);
 			}
 
 			err = gcry_cipher_setkey(handle, &hash, sizeof(hash));
 			if (err) {
 				gcry_cipher_close(handle);
-				throw Error("Setting cipher key failed: %s", gcry_strerror(err));
+				throw Error("Setting cipher key failed: %d", err);
 			}
 
 			err = gcry_cipher_setiv(handle, aesIV, sizeof(aesIV) - 1);
 			if (err) {
 				gcry_cipher_close(handle);
-				throw Error("Setting cipher IV failed: %s", gcry_strerror(err));
+				throw Error("Setting cipher IV failed: %d", err);
 			}
 
 			b512 secret;
 			err = gcry_cipher_decrypt(handle, &secret, sizeof(secret), pInput, sizeof(*pInput));
 			gcry_cipher_close(handle);
 			if (err) {
-				throw Error("Decrypting data failed: %s", gcry_strerror(err));
+				throw Error("Decrypting data failed: %d", err);
 			}
 
 			b456 d;

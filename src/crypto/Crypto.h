@@ -56,9 +56,8 @@ namespace ecrp {
 
 			string toString() {
 				stringstream ss;
-				ss << std::hex;
 				for (int i(0); i < n; ++i) {
-					ss << (int)b[i];
+					ss << std::setw(2) << std::setfill('0') << std::hex << (int)b[i];
 				}
 				return ss.str();
 			}
@@ -79,7 +78,7 @@ namespace ecrp {
 
 		typedef generic_blob<15> b120;
 		typedef generic_blob<32> b256;
-		typedef generic_blob<57> b456;
+		typedef generic_blob<57> b456; // TODO: 57
 		typedef generic_blob<64> b512;
 
 		struct PublicKey {
