@@ -155,29 +155,11 @@ void testGCrypt() {
 	}
 }
 
-void testGCrypt168() {
-	using namespace ecrp::crypto;
-	//b456 secret("fc00d7d99391756544fea3c028f48f72e9e16bd56bf0");
-	b456 secret("8b58421f373ba377a8c8f3b433cbf01e896a3d045d41");
-	b456 msg("ad744818d4d0e6e34dd4d5f6cc41f8a85edb50f4a28d");
-	PrivateKey* privateKey = new PrivateKey();
-	generateKey(privateKey, &secret, sizeof(secret), true);
-	cout << "privateKey.q: " << privateKey->q.toString() << endl;
-	cout << "privateKey.d: " << privateKey->d.toString() << endl;
-	Signature* signature = signData(&msg, sizeof(msg), privateKey);
-	cout << "signature.r: " << signature->r.toString() << endl;
-	cout << "signature.s: " << signature->s.toString() << endl;
-	bool verified = verifyData(&msg, sizeof(msg), signature, privateKey);
-	cout << "verified? " << std::to_string(verified) << endl << endl;
-}
-
 int main(int argc, char *argv[]) {
-	//testGCrypt168();
-	for (int i = 0; i < 200; i++) {
+	for (int i = 0; i < 1000; i++) {
 		testVarint();
 		testGCrypt();
 	}
-	_CrtDumpMemoryLeaks();
 	return 0;
 	parseArguments(argc, argv);
 
