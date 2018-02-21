@@ -30,8 +30,8 @@ namespace ecrp {
 			string _filename;
 
 			b512* _encryptedSecret;
-			PrivateKey* _masterKey;
-			list<DerivativeKey*> _derivativeKeys;
+			StrongPrivateKey* _masterKey;
+			list<StrongDerivativeKey*> _derivativeKeys;
 
 		public: // CONSTRUCTORS
 

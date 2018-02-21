@@ -38,7 +38,7 @@ namespace ecrp {
 			_id = to_string(t);
 			_filename = _id + ".json";
 
-			_masterKey = generateKey();
+			_masterKey = generateKey<b456>();
 		}
 
 		void Wallet::load() {
@@ -129,7 +129,7 @@ namespace ecrp {
 			}
 
 			try {
-				unlockKey(_encryptedSecret, password);
+				unlockKey<b456>(_encryptedSecret, password); // TODO
 			} catch (std::exception &) {
 				return false;
 			}

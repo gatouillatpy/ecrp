@@ -1,6 +1,7 @@
 
 #include <string>
 #include <ctime>
+#include <chrono>
 
 #include "byte.h"
 #include "utils.h"
@@ -82,7 +83,13 @@ namespace ecrp {
         return c;
     }
 
-	uint32_t getTimestampUTC() {
+	uint32_t getUnixTimestampUTC() {
 		return (uint32_t)std::time(nullptr);
+	}
+
+	uint64_t getTimestampUTC() {
+		using namespace std::chrono;
+		milliseconds t = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+		return (uint64_t)t.count();
 	}
 }

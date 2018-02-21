@@ -19,5 +19,6 @@ using std::runtime_error;
 namespace ecrp {
     uint64_t retrieveKey(const string &key);
     string formatKey(uint64_t key);
-	uint32_t getTimestampUTC();
+	uint32_t getUnixTimestampUTC();
+	uint64_t getTimestampUTC();
 }

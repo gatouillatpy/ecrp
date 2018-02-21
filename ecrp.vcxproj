@@ -21,7 +21,7 @@
     <ClCompile Include="src\blockchain\transactions\TransactionInput.cpp" />
     <ClCompile Include="src\blockchain\transactions\TransactionOutput.cpp" />
     <ClCompile Include="src\crypto\Crypto.cpp" />
-    <ClCompile Include="src\ECRP.cpp" />
+    <ClCompile Include="src\ECRP_Test.cpp" />
     <ClCompile Include="src\errors\Error.cpp" />
     <ClCompile Include="src\geodis\Paging.cpp" />
     <ClCompile Include="src\geodis\Point.cpp" />
@@ -149,7 +149,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ExceptionHandling>Async</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

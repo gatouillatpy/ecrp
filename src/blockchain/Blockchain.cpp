@@ -48,7 +48,7 @@ namespace ecrp {
 		}
 
 		void Blockchain::createGenesisBlock() {
-			uint32_t timestamp = ecrp::getTimestampUTC();
+			uint32_t timestamp = ecrp::getUnixTimestampUTC();
 			MasterBlock* mb = new MasterBlock(0, timestamp);
 			Block* b = new Block(timestamp);
 			Transaction* t = new Transaction(TransactionType::REWARD);
