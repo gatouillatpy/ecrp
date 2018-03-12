@@ -6,3 +6,4 @@ tmp/
 *.suo
 *.VC.db
 *.VC.opendb
+*.o
