@@ -79,6 +79,7 @@ namespace ecrp {
 
 		static const char BASE_SALT[] = ":$Z=n;d4[Yx1(8<ZyF,S/etF>Rj@f5[s";
 		static const char BASE_IV[] = "a~/:U2v@9wDC]z,6";
+		static const uint8_t *CONTEXT = 0;
 
 		extern const char format_E168_generateKey[];
 		extern const char format_E168_generateKey_withSecret[];
@@ -235,7 +236,14 @@ namespace ecrp {
 			}
 
 			decaf_spongerng_destroy(sp);
-			decaf_ed25519_derive_public_key((uint8_t*)&pOutput->q, (uint8_t*)&pOutput->d);
+			
+			if (std::is_same<bXXX, b176>::value) {
+				decaf_ed168_derive_public_key((uint8_t*)&pOutput->q, (uint8_t*)&pOutput->d);
+			} else if (std::is_same<bXXX, b256>::value) {
+				decaf_ed25519_derive_public_key((uint8_t*)&pOutput->q, (uint8_t*)&pOutput->d);
+			} else if (std::is_same<bXXX, b456>::value) {
+				decaf_ed448_derive_public_key((uint8_t*)&pOutput->q, (uint8_t*)&pOutput->d);
+			}
 
 			if (pOutput->q.b[0] == 0) {
 				throw Error("Unable to generate a key.");
@@ -276,7 +284,15 @@ namespace ecrp {
 				memcpy(&key.q, &pPrivateKey->q, sizeof(pPrivateKey->q));
 			}
 
-			decaf_ed25519_sign((uint8_t*)&output, (const uint8_t*)&key.d, (const uint8_t*)&key.q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED25519_NO_CONTEXT, 0); // TODO: choose the right function
+			if (std::is_same<bXXX, b176>::value) {
+				decaf_ed168_sign((uint8_t*)&output, (const uint8_t*)&key.d, (const uint8_t*)&key.q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED168_NO_CONTEXT /*CONTEXT*/, 0); // TODO: choose the right function
+			} else if (std::is_same<bXXX, b256>::value) {
+				decaf_ed25519_sign((uint8_t*)&output, (const uint8_t*)&key.d, (const uint8_t*)&key.q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED25519_NO_CONTEXT /*CONTEXT*/, 0); // TODO: choose the right function
+			} else if (std::is_same<bXXX, b456>::value) {
+				decaf_ed448_sign((uint8_t*)&output, (const uint8_t*)&key.d, (const uint8_t*)&key.q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED448_NO_CONTEXT /*CONTEXT*/, 0); // TODO: choose the right function
+			}
+			//cout << "signature.r: " << output.r.toString() << endl;
+			//cout << "signature.s: " << output.s.toString() << endl;
 			return new Signature<bXXX>(output);
 		}
 
@@ -339,12 +355,20 @@ namespace ecrp {
 			gcry_sexp_release(s_component);
 
 			gcry_sexp_release(signature);
+			//cout << "signature.r: " << output.r.toString() << endl;
+			//cout << "signature.s: " << output.s.toString() << endl;
 			return new Signature<bXXX>(output);
 		}
 
 		template<class bXXX> bool verifyData(const void* pInputData, size_t inputSize, const Signature<bXXX>* pInputSignature, const PublicKey<bXXX>* pPublicKey) {
 			decaf_error_t err;
-			err = decaf_ed25519_verify((const uint8_t*)pInputSignature, (const uint8_t*)&pPublicKey->q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED25519_NO_CONTEXT, 0); // TODO: choose the right function
+			if (std::is_same<bXXX, b176>::value) {
+				err = decaf_ed168_verify((const uint8_t*)pInputSignature, (const uint8_t*)&pPublicKey->q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED168_NO_CONTEXT, 0);
+			} else if (std::is_same<bXXX, b256>::value) {
+				err = decaf_ed25519_verify((const uint8_t*)pInputSignature, (const uint8_t*)&pPublicKey->q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED25519_NO_CONTEXT, 0);
+			} else if (std::is_same<bXXX, b456>::value) {
+				err = decaf_ed448_verify((const uint8_t*)pInputSignature, (const uint8_t*)&pPublicKey->q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED448_NO_CONTEXT, 0);
+			}
 			return err == DECAF_SUCCESS;
 		}
 

@@ -16,7 +16,7 @@ using std::endl;
 using namespace ecrp::crypto;
 
 const bool VERBOSE = false;
-const int LOOP_COUNT = 2000;
+const int LOOP_COUNT = 20000;
 const std::string COMMON_MSG = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 
@@ -72,13 +72,19 @@ void testGCrypt256() {
 	b256 msg("DDAF35A193617ABACC417349AE20413112E6FA4E89A97EA20A9EEEE64B55D39A");
 	BalancedPrivateKey* privateKey = new BalancedPrivateKey();
 	generateKey(privateKey, &secret, sizeof(secret), true);
-	cout << "privateKey.q: " << privateKey->q.toString() << endl;
-	cout << "privateKey.d: " << privateKey->d.toString() << endl;
+	if (VERBOSE) {
+		cout << "privateKey.q: " << privateKey->q.toString() << endl;
+		cout << "privateKey.d: " << privateKey->d.toString() << endl;
+	}
 	BalancedSignature* signature = signData(&msg, sizeof(msg), privateKey);
-	cout << "signature.r: " << signature->r.toString() << endl;
-	cout << "signature.s: " << signature->s.toString() << endl;
+	if (VERBOSE) {
+		cout << "signature.r: " << signature->r.toString() << endl;
+		cout << "signature.s: " << signature->s.toString() << endl;
+	}
 	bool verified = verifyData(&msg, sizeof(msg), signature, privateKey);
-	cout << "verified? " << std::to_string(verified) << endl << endl;
+	if (VERBOSE) {
+		cout << "verified? " << std::to_string(verified) << endl << endl;
+	}
 }
 
 template<class bXXX> void testKeygen(const char* algoName) {
@@ -108,7 +114,7 @@ template<class bXXX> void testSign(const char* algoName) {
 		try {
 			privateKey = generateKey<bXXX>();
 			Signature<bXXX>* signature = signData((void*)COMMON_MSG.c_str(), COMMON_MSG.size(), privateKey);
-			bool verified = verifyData((void*)COMMON_MSG.c_str(), COMMON_MSG.size(), signature, privateKey);
+			bool verified = verifyData((void*)COMMON_MSG.c_str(), COMMON_MSG.size(), signature, privateKey); // REMOVE
 			if (!verified) {
 				delete privateKey;
 				privateKey = NULL;
@@ -116,6 +122,7 @@ template<class bXXX> void testSign(const char* algoName) {
 			delete signature;
 		} catch (const ecrp::Error& e) {
 			cerr << e.what() << endl;
+			privateKey = NULL;
 		}
 	}
 
@@ -218,16 +225,16 @@ void testFastVerify() {
 }
 
 int main(int argc, char *argv[]) {
-	//testGCrypt256();
-	//testFastKeygen();
-	//testFastSign();
-	//testFastVerify();
+	testGCrypt256();
+	testFastKeygen();
+	testFastSign();
+	testFastVerify();
 	testBalancedKeygen();
 	testBalancedSign();
 	testBalancedVerify();
-	//testStrongKeygen();
-	//testStrongSign();
-	//testStrongVerify();
+	testStrongKeygen();
+	testStrongSign();
+	testStrongVerify();
 	system("pause");
 	return 0;
 }
