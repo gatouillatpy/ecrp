@@ -175,7 +175,7 @@ namespace ecrp {
 				throw Error("Cannot get the address #%d, only %d were generated.", addressNumber, _derivativeKeys.size());
 			}
 
-			int n = 1;
+			uint32_t n = 1;
 			for (auto i = _derivativeKeys.begin(); i != _derivativeKeys.end(); ++i) {
 				if (n == addressNumber) {
 					auto t = *i;

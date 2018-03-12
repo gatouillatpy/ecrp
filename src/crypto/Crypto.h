@@ -6,7 +6,10 @@
 #include <iomanip>
 #include <memory>
 #include <type_traits>
+#include <algorithm>
 #include <gcrypt.h>
+#include <decaf/eddsa.hxx>
+#include <decaf/spongerng.h>
 
 using std::string;
 using std::stringstream;
@@ -20,8 +23,62 @@ using std::stoul;
 namespace ecrp {
 	namespace crypto {
 
-		static const char aesSalt[] = ":$Z=n;d4[Yx1(8<ZyF,S/etF>Rj@f5[s";
-		static const char aesIV[] = "a~/:U2v@9wDC]z,6";
+		template<size_t n> struct generic_blob {
+			byte b[n];
+
+			generic_blob() {
+				for (size_t i(0); i < n; ++i) {
+					b[i] = 0;
+				}
+			}
+
+			generic_blob(const string& s) {
+				for (size_t i(0); i < n; ++i) {
+					b[i] = (byte)stoul(s.substr(2 * i, 2), 0, 16);
+				}
+			}
+
+			template<size_t z> bool equals(const generic_blob<z>& other) {
+				if (z == n) {
+					for (size_t i(0); i < n; ++i) {
+						if (b[i] != other.b[i]) {
+							return false;
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+
+			template<size_t z> bool equalsRegardlessOfSize(const generic_blob<z>& other) {
+				size_t w = std::min(n, z);
+
+				for (size_t i(0); i < w; ++i) {
+					if (b[i] != other.b[i]) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			string toString() {
+				stringstream ss;
+				for (size_t i(0); i < n; ++i) {
+					ss << std::setw(2) << std::setfill('0') << std::hex << (int)b[i];
+				}
+				return ss.str();
+			}
+		};
+
+		typedef generic_blob<15> b120;
+		typedef generic_blob<22> b176;
+		typedef generic_blob<32> b256;
+		typedef generic_blob<57> b456;
+		typedef generic_blob<64> b512;
+
+		static const char BASE_SALT[] = ":$Z=n;d4[Yx1(8<ZyF,S/etF>Rj@f5[s";
+		static const char BASE_IV[] = "a~/:U2v@9wDC]z,6";
 
 		extern const char format_E168_generateKey[];
 		extern const char format_E168_generateKey_withSecret[];
@@ -97,54 +154,6 @@ namespace ecrp {
 			}
 		}
 
-		template<size_t n> struct generic_blob {
-			byte b[n];
-
-			generic_blob() {
-				for (int i(0); i < n; ++i) {
-					b[i] = 0;
-				}
-			}
-
-			generic_blob(const string& s) {
-				for (int i(0); i < n; ++i) {
-					b[i] = (byte)stoul(s.substr(2 * i, 2), 0, 16);
-				}
-			}
-
-			template<size_t z> bool equals(const generic_blob<z>& other) {
-				if (z == n) {
-					for (int i(0); i < n; ++i) {
-						if (b[i] != other.b[i]) {
-							return false;
-						}
-					}
-					return true;
-				}
-				return false;
-			}
-
-			template<size_t z> bool equalsRegardlessOfSize(const generic_blob<z>& other) {
-				size_t w = min(n, z);
-
-				for (int i(0); i < w; ++i) {
-					if (b[i] != other.b[i]) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			string toString() {
-				stringstream ss;
-				for (int i(0); i < n; ++i) {
-					ss << std::setw(2) << std::setfill('0') << std::hex << (int)b[i];
-				}
-				return ss.str();
-			}
-		};
-
 		template<size_t n> generic_blob<n> shake256(const void* pInputData, size_t inputSize, const generic_blob<n>& outputData) {
 			gcry_md_hd_t hd;
 			gpg_error_t err;
@@ -157,12 +166,6 @@ namespace ecrp {
 			gcry_md_close(hd);
 			return outputData;
 		}
-
-		typedef generic_blob<15> b120;
-		typedef generic_blob<22> b176;
-		typedef generic_blob<32> b256;
-		typedef generic_blob<57> b456;
-		typedef generic_blob<64> b512;
 
 		template<class bXXX> struct PublicKey {
 			bXXX q;
@@ -205,63 +208,38 @@ namespace ecrp {
 
 		b256 sha256(const void* pInputData, size_t inputSize);
 
-		template<class bXXX> void generateKey(PrivateKey<bXXX>* pOutput, const void* pSecretData, size_t secretSize, bool isRaw) {
-			void* buffer;
-			uint32_t bufferSize;
-			gpg_error_t err;
+		enum Deterministic {
+			RANDOM = 0,
+			DETERMINISTIC = 1
+		};
 
-			gcry_sexp_t key_spec;
+		template<class bXXX> void generateKey(PrivateKey<bXXX>* pOutput, const void* pSecretData, size_t secretSize, bool isRaw) {
+			memset(&pOutput->q, 0, sizeof(pOutput->q));
+
+			decaf_keccak_prng_t sp;
+			decaf_spongerng_init_from_buffer(sp, (const uint8_t*)BASE_IV, sizeof(BASE_IV), DETERMINISTIC); // RANDOM
+			//decaf_spongerng_stir(sp, (const uint8_t*)&d, sizeof(d));
+
 			if (pSecretData && secretSize) {
 				if (isRaw) {
-					err = gcry_sexp_build(&key_spec, NULL, format_generateKey_withSecret<bXXX>(), secretSize, pSecretData);
+					if (secretSize >= sizeof(pOutput->d)) {
+						memcpy(&pOutput->d, pSecretData, sizeof(pOutput->d));
+					} else {
+						throw Error("Not enough secret data.");
+					}
+				} else {
+					decaf_shake256_hash((uint8_t*)&pOutput->d, sizeof(pOutput->d), (uint8_t*)pSecretData, secretSize);
 				}
-				else {
-					b456 d = shake256(pSecretData, secretSize, b456());
-					err = gcry_sexp_build(&key_spec, NULL, format_generateKey_withSecret<bXXX>(), sizeof(d), &d);
-				}
-			}
-			else {
-				err = gcry_sexp_build(&key_spec, NULL, format_generateKey<bXXX>());
-			}
-			if (err) {
-				throw Error("Creating S-expression failed: %d", err);
+			} else {
+				decaf_spongerng_next(sp, (uint8_t*)&pOutput->d, sizeof(pOutput->d));
 			}
 
-			gcry_sexp_t key_pair;
-			err = gcry_pk_genkey(&key_pair, key_spec);
-			gcry_sexp_release(key_spec);
-			if (err) {
-				throw Error("Creating ECC key failed: %d", err);
-			}
+			decaf_spongerng_destroy(sp);
+			decaf_ed25519_derive_public_key((uint8_t*)&pOutput->q, (uint8_t*)&pOutput->d);
 
-			gcry_sexp_t private_key;
-			private_key = gcry_sexp_find_token(key_pair, "private-key", 0);
-			gcry_sexp_release(key_pair);
-			if (!private_key) {
-				throw Error("Private part missing in key.");
+			if (pOutput->q.b[0] == 0) {
+				throw Error("Unable to generate a key.");
 			}
-
-			gcry_sexp_t q_component;
-			q_component = gcry_sexp_find_token(private_key, "q", 0);
-			if (!q_component) {
-				gcry_sexp_release(private_key);
-				throw Error("Q component missing from the private key.");
-			}
-			buffer = (void*)gcry_sexp_nth_data(q_component, 1, &bufferSize);
-			memcpy(&pOutput->q, buffer, sizeof(pOutput->q));
-			gcry_sexp_release(q_component);
-
-			gcry_sexp_t d_component;
-			d_component = gcry_sexp_find_token(private_key, "d", 0);
-			if (!d_component) {
-				gcry_sexp_release(private_key);
-				throw Error("D component missing from the private key.");
-			}
-			buffer = (void*)gcry_sexp_nth_data(d_component, 1, &bufferSize);
-			memcpy(&pOutput->d, buffer, sizeof(pOutput->d));
-			gcry_sexp_release(d_component);
-
-			gcry_sexp_release(private_key);
 		}
 
 		template<class bXXX> PrivateKey<bXXX>* generateKey() {
@@ -282,7 +260,27 @@ namespace ecrp {
 			return new DerivativeKey<bXXX>(output);
 		}
 
-		template<class bXXX> Signature<bXXX>* signData(void* pInputData, size_t inputSize, const PrivateKey<bXXX>* pPrivateKey) {
+		template<class bXXX> Signature<bXXX>* signData(const void* pInputData, size_t inputSize, const PrivateKey<bXXX>* pPrivateKey) {
+			Signature<bXXX> output;
+			PrivateKey<bXXX> key;
+
+			if (typeid(*pPrivateKey) == typeid(DerivativeKey<bXXX>)) {
+				const DerivativeKey<bXXX>* pDerivativeKey = (const DerivativeKey<bXXX>*)(pPrivateKey);
+				size_t slen = sizeof(pDerivativeKey->d) + sizeof(pDerivativeKey->k);
+				std::unique_ptr<byte> sbuf(new byte[slen]);
+				memcpy(sbuf.get(), &pDerivativeKey->d, sizeof(pDerivativeKey->d));
+				memcpy(sbuf.get() + sizeof(pDerivativeKey->d), &pDerivativeKey->k, sizeof(pDerivativeKey->k));
+				decaf_shake256_hash((uint8_t*)&key.d, sizeof(key.d), (const uint8_t*)sbuf.get(), slen);
+			} else {
+				memcpy(&key.d, &pPrivateKey->d, sizeof(pPrivateKey->d));
+				memcpy(&key.q, &pPrivateKey->q, sizeof(pPrivateKey->q));
+			}
+
+			decaf_ed25519_sign((uint8_t*)&output, (const uint8_t*)&key.d, (const uint8_t*)&key.q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED25519_NO_CONTEXT, 0); // TODO: choose the right function
+			return new Signature<bXXX>(output);
+		}
+
+		template<class bXXX> Signature<bXXX>* signData_OLD(void* pInputData, size_t inputSize, const PrivateKey<bXXX>* pPrivateKey) {
 			Signature<bXXX> output;
 			void* buffer;
 			uint32_t bufferSize;
@@ -344,7 +342,13 @@ namespace ecrp {
 			return new Signature<bXXX>(output);
 		}
 
-		template<class bXXX> bool verifyData(void* pInputData, size_t inputSize, const Signature<bXXX>* pInputSignature, const PublicKey<bXXX>* pPublicKey) {
+		template<class bXXX> bool verifyData(const void* pInputData, size_t inputSize, const Signature<bXXX>* pInputSignature, const PublicKey<bXXX>* pPublicKey) {
+			decaf_error_t err;
+			err = decaf_ed25519_verify((const uint8_t*)pInputSignature, (const uint8_t*)&pPublicKey->q, (const uint8_t*)pInputData, inputSize, 0, DECAF_ED25519_NO_CONTEXT, 0); // TODO: choose the right function
+			return err == DECAF_SUCCESS;
+		}
+
+		template<class bXXX> bool verifyData_OLD(void* pInputData, size_t inputSize, const Signature<bXXX>* pInputSignature, const PublicKey<bXXX>* pPublicKey) {
 			gpg_error_t err;
 
 			gcry_sexp_t public_key;
@@ -382,10 +386,10 @@ namespace ecrp {
 		template<class bXXX> b512* lockKey(const PrivateKey<bXXX>* pKey, const string& password) {
 			gpg_error_t err;
 
-			size_t slen = password.size() + sizeof(aesSalt) - 1;
+			size_t slen = password.size() + sizeof(BASE_SALT) - 1;
 			std::unique_ptr<byte> sbuf(new byte[slen]);
 			memcpy(sbuf.get(), password.c_str(), password.size());
-			memcpy(sbuf.get() + password.size(), aesSalt, sizeof(aesSalt) - 1);
+			memcpy(sbuf.get() + password.size(), BASE_SALT, sizeof(BASE_SALT) - 1);
 			b256 hash = sha256(sbuf.get(), slen);
 
 			gcry_cipher_hd_t handle;
@@ -400,7 +404,7 @@ namespace ecrp {
 				throw Error("Setting cipher key failed: %d", err);
 			}
 
-			err = gcry_cipher_setiv(handle, aesIV, sizeof(aesIV) - 1);
+			err = gcry_cipher_setiv(handle, BASE_IV, sizeof(BASE_IV) - 1);
 			if (err) {
 				gcry_cipher_close(handle);
 				throw Error("Setting cipher IV failed: %d", err);
@@ -422,10 +426,10 @@ namespace ecrp {
 		template<class bXXX> PrivateKey<bXXX>* unlockKey(const b512* pInput, const string& password) {
 			gpg_error_t err;
 
-			size_t slen = password.size() + sizeof(aesSalt) - 1;
+			size_t slen = password.size() + sizeof(BASE_SALT) - 1;
 			std::unique_ptr<byte> sbuf(new byte[slen]);
 			memcpy(sbuf.get(), password.c_str(), password.size());
-			memcpy(sbuf.get() + password.size(), aesSalt, sizeof(aesSalt) - 1);
+			memcpy(sbuf.get() + password.size(), BASE_SALT, sizeof(BASE_SALT) - 1);
 			b256 hash = sha256(sbuf.get(), slen);
 
 			gcry_cipher_hd_t handle;
@@ -440,7 +444,7 @@ namespace ecrp {
 				throw Error("Setting cipher key failed: %d", err);
 			}
 
-			err = gcry_cipher_setiv(handle, aesIV, sizeof(aesIV) - 1);
+			err = gcry_cipher_setiv(handle, BASE_IV, sizeof(BASE_IV) - 1);
 			if (err) {
 				gcry_cipher_close(handle);
 				throw Error("Setting cipher IV failed: %d", err);

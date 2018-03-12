@@ -2,8 +2,10 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 using std::string;
+using std::stringstream;
 
 #include "byte.h"
 

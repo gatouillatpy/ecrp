@@ -41,6 +41,7 @@ namespace ecrp {
 		using BigEndian = std::false_type;
 #endif
 #else
+		using NativeEndian = std::true_type;
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 		using LittleEndian = std::true_type;
 		using BigEndian = std::false_type;
@@ -226,7 +227,7 @@ namespace ecrp {
 
             std::vector<byte> vec((size_t)size);
             istm.read(vec);
-            val.assign(&vec[0], (size_t)size);
+            val.assign((char*)&vec[0], (size_t)size);
 
             return istm;
         }
@@ -339,7 +340,7 @@ namespace ecrp {
                         throw std::runtime_error("Premature end of array!");
                     }
 
-                    str.assign(&m_vec[m_index], size);
+                    str.assign((char*)&m_vec[m_index], size);
 
                     m_index += str.size();
                 }
@@ -476,7 +477,7 @@ namespace ecrp {
                         throw std::runtime_error("Premature end of array!");
                     }
 
-                    str.assign(&m_arr[m_index], size);
+                    str.assign((char*)&m_arr[m_index], size);
 
                     m_index += str.size();
                 }
@@ -614,7 +615,7 @@ namespace ecrp {
                         throw std::runtime_error("Premature end of array!");
                     }
 
-                    str.assign(&m_arr[m_index], size);
+                    str.assign((char*)&m_arr[m_index], size);
 
                     m_index += str.size();
                 }

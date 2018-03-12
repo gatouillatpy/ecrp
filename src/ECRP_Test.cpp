@@ -1,6 +1,8 @@
 
 #include <iostream>
 
+#include <assert.h>
+
 using std::exception;
 using std::cout;
 using std::cerr;
@@ -14,11 +16,24 @@ using std::endl;
 using namespace ecrp::crypto;
 
 const bool VERBOSE = false;
-const int LOOP_COUNT = 200;
+const int LOOP_COUNT = 2000;
 const std::string COMMON_MSG = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-void testVarint() {
 
+extern "C" void
+__chkstk_ms()
+{
+}
+
+extern "C" void
+__assert_func(const char *file, int line, const char *func, const char *failedexpr)
+{
+}
+
+extern "C" void
+__assert(const char *file, int line, const char *failedexpr)
+{
+	__assert_func(file, line, NULL, failedexpr);
 }
 
 /*void ff() {
@@ -83,7 +98,7 @@ template<class bXXX> void testKeygen(const char* algoName) {
 	}
 	uint64_t dt = ecrp::getTimestampUTC() - t0;
 	double n = (double)(1000 * LOOP_COUNT) / dt;
-	cout << "Done in " << dt << " ms. (" << std::setprecision(4) << n << " keys/s)" << endl;
+	cout << "Done in " << dt << " ms. (" << std::setprecision(6) << n << " keys/s)" << endl;
 }
 
 template<class bXXX> void testSign(const char* algoName) {
@@ -120,7 +135,7 @@ template<class bXXX> void testSign(const char* algoName) {
 	}
 	uint64_t dt = ecrp::getTimestampUTC() - t0;
 	double n = (double)(1000 * LOOP_COUNT) / dt;
-	cout << "Done in " << dt << " ms. (" << std::setprecision(4) << n << " signatures/s)" << endl;
+	cout << "Done in " << dt << " ms. (" << std::setprecision(6) << n << " signatures/s)" << endl;
 
 	delete privateKey;
 }
@@ -160,7 +175,7 @@ template<class bXXX> void testVerify(const char* algoName) {
 	}
 	uint64_t dt = ecrp::getTimestampUTC() - t0;
 	double n = (double)(1000 * LOOP_COUNT) / dt;
-	cout << "Done in " << dt << " ms. (" << std::setprecision(4) << n << " verifications/s)" << endl;
+	cout << "Done in " << dt << " ms. (" << std::setprecision(6) << n << " verifications/s)" << endl;
 
 	delete signature;
 	delete privateKey;
@@ -204,15 +219,15 @@ void testFastVerify() {
 
 int main(int argc, char *argv[]) {
 	//testGCrypt256();
-	testFastKeygen();
-	testFastSign();
-	testFastVerify();
+	//testFastKeygen();
+	//testFastSign();
+	//testFastVerify();
 	testBalancedKeygen();
 	testBalancedSign();
 	testBalancedVerify();
-	testStrongKeygen();
-	testStrongSign();
-	testStrongVerify();
+	//testStrongKeygen();
+	//testStrongSign();
+	//testStrongVerify();
 	system("pause");
 	return 0;
 }
